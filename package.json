@@ -1,0 +1,15 @@
+{
+  "name": "hackathon-overproofed-game",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:clio/hackathon-overproofed-game.git",
+  "author": "Team Overproofed",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^0.12.3",
+    "phaser": "^3.23.0"
+  },
+  "scripts": {
+    "start": "yarn run http-server"
+  }
+}
