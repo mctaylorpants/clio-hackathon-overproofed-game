@@ -13,7 +13,7 @@
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 200 }
+                gravity: { y: 0 }
             }
         },
         scene: {
@@ -26,6 +26,10 @@
     var game = new Phaser.Game(config);
     let oven_open;
     let oven_close;
+    let bakingState = false;
+    let bakingPercentage = 0;
+    let temperature = 0;
+
     function preload ()
     {
         this.load.image('background', "assets/baking/bg-baking.png");
@@ -38,9 +42,9 @@
     {
         this.add.image(400, 300, 'background');
 
-        var oven_close = this.physics.add.image(960, 530, 'oven-close').setDisplaySize(400, 500);
-        var oven_open = this.physics.add.image(960, 530, 'oven-open');
-        
+        oven_close = this.physics.add.image(960, 530, 'oven-close').setDisplaySize(400, 500);
+        oven_open = this.physics.add.image(960, 530, 'oven-open');
+
         var sourdough_flour = this.physics.add.sprite(400, 100,'sourdough-flour').setDisplaySize(160, 200);
         closeOven();
 
@@ -50,10 +54,12 @@
             sourdough_flour.setPosition(x, y)
             });
 
+        oven_close.setInteractive();
+        oven_open.setInteractive();
+
         oven_close.on("pointerdown", openOven);
         oven_open.on("pointerdown", closeOven);
-
-
+        console.log(temperature);
     }
 
     function openOven() {
@@ -64,6 +70,15 @@
         oven_open.visible = false;
     }
 
+    function isInBakingState() {
+        return bakingState;
+    }
+
+    function isDoughInOven() {
+        closeOven();
+        bakingState = true;
+        //display temperature lever
+    }
 
     function update() {
 
