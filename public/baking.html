@@ -36,32 +36,23 @@
 
     function create ()
     {
-<<<<<<< HEAD
         this.add.image(400, 300, 'background');
 
         var oven_close = this.physics.add.image(960, 530, 'oven-close').setDisplaySize(400, 500);
         var oven_open = this.physics.add.image(960, 530, 'oven-open');
         
         var sourdough_flour = this.physics.add.sprite(400, 100,'sourdough-flour').setDisplaySize(160, 200);
-=======
-        oven_close = this.add.image(960, 530, 'oven-close');
-        oven_open = this.add.image(960, 530, 'oven-open');
         closeOven();
->>>>>>> 1d873bf8084a7ae59158dece271bde19d52ec75c
 
-        oven_close.setInteractive();
-        oven_open.setInteractive();
-
-<<<<<<< HEAD
         sourdough_flour
             .setInteractive({ draggable: true })
             .on('drag', function(pointer, x, y) {
             sourdough_flour.setPosition(x, y)
             });
-=======
+
         oven_close.on("pointerdown", openOven);
         oven_open.on("pointerdown", closeOven);
->>>>>>> 1d873bf8084a7ae59158dece271bde19d52ec75c
+
 
     }
 
