@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser-arcade-physics.min.js"></script>
+</head>
+<body>
+
+    <p>Baking Percentage: <span id="baking-percentage">0</span>%  <button onclick="startBaking()">Test Baking</button><button onclick="stopBaking()">stop</button></p>
+    <script>
+    var config = {
+        type: Phaser.AUTO,
+        width: 1920,
+        height: 1080,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 0 }
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update,
+        }
+    };
+
+    var game = new Phaser.Game(config);
+    var bakingTimer;
+    let oven_open;
+    let oven_close;
+    let bakingState = false;
+    let bakingPercentage = 0;
+    let temperature = 0;
+
+    var rect1;
+    var rect2;
+    var graphics;
+
+    function preload ()
+    {
+        this.load.image('background', "assets/baking/bg-baking.png");
+        this.load.image('oven-close', "assets/baking/oven-close.jpg");
+        this.load.image('oven-open', "assets/baking/oven-open.png");
+        this.load.image('sourdough-flour', 'assets/baking/sourdough-flour.jpg');
+        this.load.image('button-close', "assets/baking/close.png");
+        this.load.image('button-open', "assets/baking/open.png");
+        this.load.image('thumbup', "assets/baking/thumbup.jpg");
+        this.load.image('block', 'assets/baking/block.png');
+    }
+
+    function create ()
+    {
+        this.add.image(400, 300, 'background');
+
+        oven_close = this.physics.add.image(960, 530, 'oven-close').setDisplaySize(400, 500);
+        oven_open = this.physics.add.image(960, 530, 'oven-open');
+        button_close = this.physics.add.image(960, 700, 'button-close');
+        button_open = this.physics.add.image(960, 700, 'button-open');
+
+        thumb_up = this.physics.add.image(960, 200, 'thumbup').setDisplaySize(200, 200);;
+        thumb_up.visible = false;
+
+        sourdough_flour = this.physics.add.sprite(400, 100,'sourdough-flour').setDisplaySize(160, 200);
+        closeOven();
+        sourdough_flour
+            .setInteractive({ draggable: true })
+            .on('drag', function(pointer, x, y) {
+                sourdough_flour.setPosition(x, y);
+                isDoughInOven(sourdough_flour, oven_open)
+            });
+
+        oven_close.setInteractive();
+        oven_open.setInteractive();
+
+        oven_close.on("pointerdown", openOven);
+        oven_open.on("pointerdown", closeOven);
+        console.log(temperature);
+
+        graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
+        lever_block = this.physics.add.image(1310,300, 'block').setScale(1, 0.5);
+
+        rect1 = new Phaser.Geom.Rectangle(1300, 200, 20, 200);
+        // rect2 = new Phaser.Geom.Rectangle(1285, 300, 50, 20);
+
+        graphics.clear();
+        graphics.fillRectShape(rect1);
+
+        lever_block.setInteractive({draggable: true})
+            .on("drag", function(pointer, x, y) {
+                let y_position = (y < 200) ? 200: y;
+                y_position = (y_position > 400 ) ? 400: y_position;
+                lever_block.setPosition(1313,y_position);
+            });
+
+    }
+
+    function openOven() {
+        oven_open.visible = true;
+        button_close.visible = true;
+        button_open.visible = false;
+    }
+
+    function closeOven() {
+        oven_open.visible = false;
+        button_close.visible = false;
+        button_open.visible = true;
+
+    }
+
+    function isInBakingState() {
+        return bakingState;
+    }
+
+    function isDoughInOven(sourdough_flour, oven_open) {
+        // closeOven();
+        bakingState = true;
+        if (Math.abs(oven_open.x-sourdough_flour.x) < 50 && Math.abs(oven_open.y-sourdough_flour.y) < 10){
+            console.log(oven_open.x, oven_open.y, sourdough_flour.x, sourdough_flour.y);
+            return true;
+        }
+        return false
+        //display temperature lever
+    }
+
+    function startBaking() {
+        console.log("start baking")
+
+        bakingTimer = setInterval(function() {
+            bakingPercentage += 1;
+            document.getElementById("baking-percentage").innerHTML = bakingPercentage;
+            if (bakingPercentage > 90 && bakingPercentage <100) {
+                thumb_up.visible = true;
+            } else {
+                thumb_up.visible = false;
+            }
+        }, 70);
+
+    }
+
+    function stopBaking() {
+        clearInterval(bakingTimer);
+    }
+
+    function update() {
+    }
+    </script>
+
+</body>
+</html>
