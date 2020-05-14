@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser-arcade-physics.min.js"></script>
+</head>
+<body>
+    <script>
+    var config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 150 },
+            debug: false,
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update,
+        }
+    };
+
+    var game = new Phaser.Game(config);
+
+    function preload ()
+    {
+        this.load.image('sky', 'assets/sky.png');
+        this.load.image('ground', 'assets/platform.png');
+        this.load.image('bird', 'assets/star.png');
+        this.load.image('bucket', 'assets/bucket.png');
+        // this.load.image('faucet', 'assets/faucet.png');
+        this.load.spritesheet('water',
+            'assets/dude.png',
+            { frameWidth: 100, frameHeight: 100 }
+        );
+        this.load.spritesheet('flour',
+            'assets/flour.png',
+            { frameWidth: 100, frameHeight: 100 }
+        );
+    }
+
+    var platforms;
+
+    var interval;
+    var scoreWater = 0;
+    var scoreTextWater;
+    var scoreFlour = 0;
+    var scoreTextFlour;
+
+    function create ()
+    {
+        this.add.image(400, 300, 'sky');
+        bucket = this.add.image(400, 420, 'bucket');
+        platforms = this.physics.add.staticGroup();
+        platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+        initializeDough();
+    }
+
+    function initializeDough() {
+      initializeWater();
+      initializeFlour();
+    }
+
+    function initializeWater() {
+      scoreTextWater = game.scene.scenes[0].add.text(16, 16, 'Water Score: 0', { fontSize: '32px', fill: '#000' });
+      const waterButton = game.scene.scenes[0].add.text(100, 100, 'Add Water', { fill: '#0f0' });
+      waterButton.setInteractive();
+      waterButton.on('pointerdown', onPointerDownWater);
+      waterButton.on('pointerup', onPointerUp); 
+      waterButton.on('pointerout', onPointerOut);
+    }
+
+    function initializeFlour() {
+      scoreTextFlour = game.scene.scenes[0].add.text(450, 16, 'Flour Score: 0', { fontSize: '32px', fill: '#000' });
+      const flourButton = game.scene.scenes[0].add.text(200, 100, 'Add Flour', { fill: '#0f0' });
+      flourButton.setInteractive();
+      flourButton.on('pointerdown', onPointerDownFlour);
+      flourButton.on('pointerup', onPointerUp); 
+      flourButton.on('pointerout', onPointerOut);
+    }
+
+    function onPointerDownWater() {
+      interval = setInterval(function() {
+        addWater();
+      }, 100);
+    }
+
+    function onPointerDownFlour() {
+      interval = setInterval(function() {
+        addFlour();
+      }, 100);
+    }
+
+    function onPointerUp() {
+      clearInterval(interval);
+    }
+
+    function onPointerOut() {
+      clearInterval(interval);
+    }
+
+    function addWater() {
+      console.log("Button clicked. scoreWater: " + scoreWater);
+
+      scoreWater += 1;
+      tester = game.scene.scenes[0].physics.add.sprite(400, 0, 'water');
+      game.scene.scenes[0].physics.add.collider(tester, platforms);
+      scoreTextWater.setText('Water Score: ' + scoreWater);
+    }
+
+    function addFlour() {
+      console.log("Button clicked. scoreFlour: " + scoreFlour);
+
+      scoreFlour += 1;
+      tester = game.scene.scenes[0].physics.add.sprite(400, 0, 'flour');
+      game.scene.scenes[0].physics.add.collider(tester, platforms);
+      scoreTextFlour.setText('Flour Score: ' + scoreFlour);
+    }
+
+    function update ()
+    {
+
+    }
+
+    </script>
+
+</body>
+</html>
