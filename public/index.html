@@ -8,18 +8,17 @@
     <script>
     var config = {
         type: Phaser.AUTO,
-        width: 1920,
-        height: 1080,
+        width: 800,
+        height: 600,
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 0 }
+                gravity: { y: 200 }
             }
         },
         scene: {
             preload: preload,
-            create: create,
-            update: update
+            create: create
         }
     };
 
@@ -27,30 +26,32 @@
 
     function preload ()
     {
-        this.load.image('bg-baking', 'assets/baking/bg-baking.png');
-        this.load.image('oven-close', 'assets/baking/oven-close.jpg');
-        this.load.image('oven-open', 'assets/baking/oven-open.png');
-        this.load.image('sourdough-flour', 'assets/baking/sourdough-flour.jpg');
+        this.load.setBaseURL('http://labs.phaser.io');
+
+        this.load.image('sky', 'assets/skies/space3.png');
+        this.load.image('logo', 'assets/sprites/phaser3-logo.png');
+        this.load.image('red', 'assets/particles/red.png');
     }
 
     function create ()
     {
-        this.add.image(400, 300, 'bg-baking');
+        this.add.image(400, 300, 'sky');
 
-        var sourdough_flour = this.physics.add.sprite(400, 100,'sourdough-flour').setDisplaySize(160, 200);
-        var oven_close = this.physics.add.image(700, 350, 'oven-close').setDisplaySize(400, 500);
+        var particles = this.add.particles('red');
 
-        sourdough_flour
-            .setInteractive({ draggable: true })
-            .on('drag', function(pointer, x, y) {
-            sourdough_flour.setPosition(x, y)
-            });
+        var emitter = particles.createEmitter({
+            speed: 100,
+            scale: { start: 1, end: 0 },
+            blendMode: 'ADD'
+        });
 
-    }
+        var logo = this.physics.add.image(400, 100, 'logo');
 
-    function update() 
-    {
+        logo.setVelocity(100, 200);
+        logo.setBounce(1, 1);
+        logo.setCollideWorldBounds(true);
 
+        emitter.startFollow(logo);
     }
     </script>
 
