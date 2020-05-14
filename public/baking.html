@@ -36,6 +36,8 @@
         this.load.image('oven-close', "assets/baking/oven-close.jpg");
         this.load.image('oven-open', "assets/baking/oven-open.png");
         this.load.image('sourdough-flour', 'assets/baking/sourdough-flour.jpg');
+        this.load.image('button-close', "assets/baking/close.png");
+        this.load.image('button-open', "assets/baking/open.png");
     }
 
     function create ()
@@ -44,6 +46,8 @@
 
         oven_close = this.physics.add.image(960, 530, 'oven-close').setDisplaySize(400, 500);
         oven_open = this.physics.add.image(960, 530, 'oven-open');
+        button_close = this.physics.add.image(960, 700, 'button-close');
+        button_open = this.physics.add.image(960, 700, 'button-open');
 
         var sourdough_flour = this.physics.add.sprite(400, 100,'sourdough-flour').setDisplaySize(160, 200);
         closeOven();
@@ -51,7 +55,8 @@
         sourdough_flour
             .setInteractive({ draggable: true })
             .on('drag', function(pointer, x, y) {
-            sourdough_flour.setPosition(x, y)
+                sourdough_flour.setPosition(x, y);
+                isDoughInOven(sourdough_flour, oven_open)
             });
 
         oven_close.setInteractive();
@@ -64,19 +69,29 @@
 
     function openOven() {
         oven_open.visible = true;
+        button_close.visible = true;
+        button_open.visible = false;
     }
 
     function closeOven() {
         oven_open.visible = false;
+        button_close.visible = false;
+        button_open.visible = true;
+
     }
 
     function isInBakingState() {
         return bakingState;
     }
 
-    function isDoughInOven() {
-        closeOven();
+    function isDoughInOven(sourdough_flour, oven_open) {
+        // closeOven();
         bakingState = true;
+        if (Math.abs(oven_open.x-sourdough_flour.x) < 50 && Math.abs(oven_open.y-sourdough_flour.y) < 10){
+            console.log(oven_open.x, oven_open.y, sourdough_flour.x, sourdough_flour.y);
+            return true;
+        }
+        return false
         //display temperature lever
     }
 
