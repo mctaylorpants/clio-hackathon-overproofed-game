@@ -5,6 +5,7 @@
 </head>
 <body>
 
+    <p>Baking Percentage: <span id="baking-percentage">0</span>%  <button onclick="startBaking()">Test Baking</button><button onclick="stopBaking()">stop</button></p>
     <script>
     var config = {
         type: Phaser.AUTO,
@@ -24,6 +25,7 @@
     };
 
     var game = new Phaser.Game(config);
+    var bakingTimer;
     let oven_open;
     let oven_close;
     let bakingState = false;
@@ -42,6 +44,7 @@
         this.load.image('sourdough-flour', 'assets/baking/sourdough-flour.jpg');
         this.load.image('button-close', "assets/baking/close.png");
         this.load.image('button-open', "assets/baking/open.png");
+        this.load.image('thumbup', "assets/baking/thumbup.jpg");
         this.load.image('block', 'assets/baking/block.png');
     }
 
@@ -54,9 +57,11 @@
         button_close = this.physics.add.image(960, 700, 'button-close');
         button_open = this.physics.add.image(960, 700, 'button-open');
 
-        var sourdough_flour = this.physics.add.sprite(400, 100,'sourdough-flour').setDisplaySize(160, 200);
-        closeOven();
+        thumb_up = this.physics.add.image(960, 200, 'thumbup').setDisplaySize(200, 200);;
+        thumb_up.visible = false;
 
+        sourdough_flour = this.physics.add.sprite(400, 100,'sourdough-flour').setDisplaySize(160, 200);
+        closeOven();
         sourdough_flour
             .setInteractive({ draggable: true })
             .on('drag', function(pointer, x, y) {
@@ -86,6 +91,7 @@
                 y_position = (y_position > 400 ) ? 400: y_position;
                 lever_block.setPosition(1313,y_position);
             });
+
     }
 
     function openOven() {
@@ -114,6 +120,25 @@
         }
         return false
         //display temperature lever
+    }
+
+    function startBaking() {
+        console.log("start baking")
+
+        bakingTimer = setInterval(function() {
+            bakingPercentage += 1;
+            document.getElementById("baking-percentage").innerHTML = bakingPercentage;
+            if (bakingPercentage > 90 && bakingPercentage <100) {
+                thumb_up.visible = true;
+            } else {
+                thumb_up.visible = false;
+            }
+        }, 70);
+
+    }
+
+    function stopBaking() {
+        clearInterval(bakingTimer);
     }
 
     function update() {
