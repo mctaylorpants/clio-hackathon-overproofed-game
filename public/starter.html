@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser-arcade-physics.min.js"></script>
+</head>
+
+<body>
+
+  <script>
+    var config = {
+      type: Phaser.AUTO,
+      width: 960,
+      height: 540,
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 0 }
+        }
+      },
+      scene: {
+        preload: preload,
+        create: create,
+        update: update
+      }
+    };
+
+    var game = new Phaser.Game(config);
+    var waterScore;
+    var flourScore;
+
+    var flour;
+
+    var jar;
+    var jarFace;
+    var jarLidCollision;
+    var lid;
+    var reset;
+    var water;
+
+    var setWaterScore = function (amount) {
+      waterScore.setText(`Water: ${Math.round(amount)}g`);
+    }
+
+    var setFlourScore = function (amount) {
+      flourScore.setText(`Flour: ${Math.round(amount)}g`);
+    }
+
+    var jarInitialPosition = {
+      x: 480,
+      y: 270
+    }
+    var waterInitialPosition = {
+      x: 50,
+      y: 500
+    };
+    var flourInitialPosition = {
+      x: 900,
+      y: 500
+    };
+    var resetInitialPosition = {
+      x: 480,
+      y: 500
+    };
+
+    var starter = {
+      currentWaterAmount: 0,
+      currentFlourAmount: 0,
+      readyToRise: false,
+
+      addWater: function (jar, water) {
+        this.currentWaterAmount += 0.1;
+        setWaterScore(this.currentWaterAmount)
+        this.changeEmotion();
+      },
+
+      addFlour: function (jar, flour) {
+        this.currentFlourAmount += 0.1;
+        setFlourScore(this.currentFlourAmount)
+        this.changeEmotion();
+      },
+
+      changeEmotion: function () {
+        var combinedAmount = this.currentWaterAmount + this.currentFlourAmount;
+        // console.log(`Combined %: ${combinedAmount}`)
+        if (this.currentWaterAmount >= 110 || this.currentFlourAmount >= 110) {
+          jarFace.setText('😱')
+          console.log("way too much!")
+        }
+        else if (combinedAmount > 180 && combinedAmount < 200) {
+          jarFace.setText('🙂')
+          console.log("getting close on ingredients...")
+        } else if (combinedAmount >= 200 && combinedAmount < 202) {
+          console.log("perfect!")
+          jarFace.setText('🤤');
+        } else if (combinedAmount > 202 && combinedAmount < 220) {
+          jarFace.setText('😅');
+          console.log("a bit too much")
+        }
+
+        if (this.currentWaterAmount >= 100 && this.currentFlourAmount >= 100) {
+          console.log("setting readyToRise=true")
+          this.readyToRise = true;
+        }
+      },
+
+      revealLid: function () {
+
+      },
+
+      reset: function () {
+        this.currentFlourAmount = 0;
+        this.currentWaterAmount = 0;
+      },
+
+      complete: function (jar, lid) {
+        var jarTopThreshold = jar.getTopCenter().y + 20;
+        var lidTopCenter = lid.getTopCenter().y;
+        if (lidTopCenter < jar.getTopCenter().y && lidTopCenter < jarTopThreshold) {
+          jarLidCollision.destroy();
+          lid.disableInteractive();
+          reset.disableInteractive();
+          flour.disableInteractive();
+          water.disableInteractive();
+          lid.setPosition(jar.getTopCenter().x, jar.getTopCenter().y)
+          console.log("complete!!");
+        }
+      }
+    }
+
+    function preload() {
+      this.load.image('background', 'assets/background.jpg');
+      this.load.image('jar', 'assets/jar.png');
+      this.load.image('flour', 'assets/flour.png');
+      this.load.image('water', 'assets/water.png');
+      this.load.image('reset', 'assets/reset.png');
+      this.load.image('lid', 'assets/lid.png');
+      this.load.audio('pour_flour', 'assets/pour_flour.mp3');
+      this.load.audio('pour_water', 'assets/pour_water.mp3');
+      this.load.audio('overcooked_intro', 'assets/overcooked_intro.mp3');
+    }
+
+    function create() {
+
+      this.add.image(480, 270, 'background').setDisplaySize(960, 540);
+      jar = this.physics.add.image(jarInitialPosition.x, jarInitialPosition.y, 'jar');
+      jarFace = this.add.text(430, jarInitialPosition.y, '😴', { fontSize: '100px' })
+      flour = this.physics.add.image(flourInitialPosition.x, flourInitialPosition.y, 'flour').setDisplaySize(80, 100);
+      water = this.physics.add.image(waterInitialPosition.x, waterInitialPosition.y, 'water').setDisplaySize(80, 100);
+      lid = this.physics.add.image(800, 400, 'lid').setScale(0.27);
+      lid.visible = false;
+
+      reset = this.physics.add.image(resetInitialPosition.x, resetInitialPosition.y, 'reset').setDisplaySize(75, 75);
+
+
+      var pourWater = this.sound.add('pour_water');
+      water
+        .setInteractive({ draggable: true })
+        .on('drag', function (pointer, x, y) {
+          water.setPosition(x, y);
+        });
+
+      water.on('overlapstart', function () {
+        pourWater.play();
+      });
+
+      water.on('overlapend', function () {
+        pourWater.stop();
+      });
+
+      jar.once('readyToRise', function () {
+        console.log("ready to rise")
+        lid.visible = true;
+        lid
+          .setInteractive({ draggable: true })
+          .on('drag', function (pointer, x, y) {
+            lid.setPosition(x, y);
+          });
+      });
+
+      var pourFlour = this.sound.add('pour_flour');
+      flour
+        .setInteractive({ draggable: true })
+        .on('drag', function (pointer, x, y) {
+          flour.setPosition(x, y);
+        });
+
+      flour.on('overlapstart', function () {
+        pourFlour.play();
+      });
+
+      flour.on('overlapend', function () {
+        pourFlour.stop();
+      });
+
+      reset
+        .setInteractive()
+        .on('pointerup', function () {
+          starter.reset();
+          water.setPosition(waterInitialPosition.x, waterInitialPosition.y);
+          flour.setPosition(flourInitialPosition.x, flourInitialPosition.y);
+          setWaterScore(0)
+          setFlourScore(0)
+          jarFace.setText('😴');
+        });
+
+
+      this.physics.add.overlap(jar, water, starter.addWater, null, starter);
+      this.physics.add.overlap(jar, flour, starter.addFlour, null, starter);
+      jarLidCollision = this.physics.add.overlap(jar, lid, starter.complete, null, starter);
+
+      waterScore = this.add.text(16, 16, '', { fontSize: '32px', fill: '#000' });
+      flourScore = this.add.text(750, 16, '', { fontSize: '32px', fill: '#000', align: 'right' });
+      setWaterScore(0);
+      setFlourScore(0);
+
+      var backgroundMusic = this.sound.add('overcooked_intro');
+      backgroundMusic.play();
+    }
+
+    function update() {
+      emitOverlapStartEnd(flour);
+      emitOverlapStartEnd(water);
+
+      if (starter.readyToRise) jar.emit("readyToRise");
+    }
+
+    function emitOverlapStartEnd(object) {
+      if (object.body.embedded) {
+        object.body.touching.none = false;
+      }
+      var touching = !object.body.touching.none;
+      var wasTouching = !object.body.wasTouching.none;
+      if (touching && !wasTouching) object.emit("overlapstart");
+      else if (!touching && wasTouching) object.emit("overlapend");
+    }
+  </script>
+
+</body>
+
+</html>

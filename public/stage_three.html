@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser.min.js"></script>
+</head>
+<body>
+
+    <script>
+    var config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        physics: {
+        default: 'matter',
+        matter: {
+            gravity: {
+                y: 0.8
+            },
+            enableSleep: true,
+            debug: false
+        }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    var game = new Phaser.Game(config);
+
+    function preload ()
+    {
+        this.load.image('grid', './assets/grid.png');
+        this.load.image('red_square', './assets/red_square.png');
+        this.load.image('red', './assets/red.png');
+        this.load.spritesheet('happy_bread', 'assets/sprites/happy_bread.png', { frameWidth: 229, frameHeight: 204, endFrame: 23 });
+        this.load.spritesheet('sad_bread', 'assets/sprites/sad_bread.png', { frameWidth: 221, frameHeight: 228, endFrame: 23 });
+        this.load.spritesheet('knead_success', 'assets/sprites/sourdough_success.png', { frameWidth: 583, frameHeight: 612, endFrame: 23 });
+        this.load.scenePlugin({
+            key: 'rexgesturesplugin',
+            url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexgesturesplugin.min.js',
+            sceneKey: 'rexGestures'
+        });
+    }
+    var s;
+    var count;
+    var roundCount = 1;
+    function create ()
+    {
+        setLine(this);
+        // this.matter.world.setBounds(0, 0, 800, 600, 32, true, true, false, true);
+        count = 0;
+        text = this.add.text(0, 0, 'Hits: 0', { font: '32px Courier', fill: '#ffffff' });
+
+        roundCounter = this.add.text(620, 0, `Round 1/4`, { font: '32px Courier', fill: '#ffffff' });
+        // this.add.image(400, 300, 'grid');
+        // red = this.add.sprite(600, 200, 'red_square');
+
+        var particles = this.add.particles('red');
+        this.emitter = particles.createEmitter({
+            speed: 100,
+            scale: { start: 0.3, end: 0 },
+            blendMode: 'ADD'
+        });
+        this.emitter.stop();
+        this.emitter.setTint(0xFF0000)
+
+        this.input.on('pointerdown', function(event) {
+            this.emitter.start();
+        }, this);
+
+        this.input.on('pointerup', function(event) {
+            this.emitter.stop();
+
+        }, this);
+
+        // emitter.startFollow(logo);
+
+        this.print = print = this.add.text(0, 0, '')
+
+        this.swipeInput = this.rexGestures.add.swipe({ velocityThreshold: 1000 })
+            .on('swipe', function (swipe) {
+                // print.text += `swipe, v = ${swipe.dragVelocity}\n`;
+            }, this);
+
+        this.promptText = this.add.text(300, 0);
+
+        this.time.addEvent({ delay: 2000, callback: displayGesturePrompt, callbackScope: this, repeat: 3 });
+
+        var sad_bread_sprite = this.add.sprite(400, 300, 'sad_bread').setScale(0.5);
+
+        var config = {
+            key: 'cheer_up_bread',
+            frames: this.anims.generateFrameNumbers('happy_bread', { start: 0, end: 3 }),
+            frameRate: 20
+        };
+
+        this.anims.create(config);
+    }
+    function setLine(context){
+        context.matter.world.setBounds(0, 0, 800, 600, 32, true, true, false, true);
+
+        var lineCategory = context.matter.world.nextCategory();
+        var ballsCategory = context.matter.world.nextCategory();
+
+        var sides = 4;
+        var size = 14;
+        var distance = size;
+        var stiffness = 0.1;
+        var lastPosition = new Phaser.Math.Vector2();
+        var options = { friction: 0, frictionAir: 0, restitution: 0, ignoreGravity: true, inertia: Infinity, isStatic: true, angle: 0, collisionFilter: { category: lineCategory } };
+
+        var current = null;
+        var previous = null;
+
+        context.curves = [];
+        var curve = null;
+        var timestamp = null;
+
+        context.graphics = context.add.graphics();
+
+        context.input.on('pointerdown', function (pointer) {
+            context.graphics.clear();
+            context.curves = [];
+            lastPosition.x = pointer.x;
+            lastPosition.y = pointer.y;
+
+            previous = context.matter.add.polygon(pointer.x, pointer.y, sides, size, options);
+
+            curve = new Phaser.Curves.Spline([ pointer.x, pointer.y ]);
+
+            context.curves.push([curve, timestamp]);
+
+        }, context);
+
+        context.input.on('pointermove', function (pointer) {
+
+            if (pointer.isDown)
+            {
+                var x = pointer.x;
+                var y = pointer.y;
+
+                if (Phaser.Math.Distance.Between(x, y, lastPosition.x, lastPosition.y) > distance)
+                {
+                    options.angle = Phaser.Math.Angle.Between(x, y, lastPosition.x, lastPosition.y);
+
+                    lastPosition.x = x;
+                    lastPosition.y = y;
+
+                    current = context.matter.add.polygon(pointer.x, pointer.y, sides, size, options);
+
+                    context.matter.add.constraint(previous, current, distance, stiffness);
+
+                    previous = current;
+
+                    curve.addPoint(x, y);
+
+                    context.graphics.clear();
+                    context.graphics.lineStyle(size * 1.5, 0xFF0000);
+
+                    context.curves.forEach(function(c) {
+                        c[0].draw(context.graphics, 64);
+                        c[1] = context.time.now;
+                    });
+                }
+            }
+
+        }, context);
+
+        context.input.on('pointerup', function (pointer) {
+            // context.graphics.clear();
+            // curves = [];
+
+            context.time.addEvent({
+                delay: 1000,
+                callback: function ()
+                {
+                    context.graphics.clear();
+                    max_age = context.time.now - 800;
+                    console.log(`maximum age timestamp ${max_age}`);
+                    context.curves = context.curves.filter(curve => curve[1] > max_age);
+                    context.graphics.lineStyle(size * 1.5, 0xFF0000);
+                    context.curves.forEach(function(c) {
+                        c[0].draw(context.graphics, 64);
+                    });
+                },
+                callbackScope: context,
+                repeat: 0
+            });
+
+        }, context);
+    }
+    function update ()
+    {
+        // if (this.swipeInput.isSwiped) {
+        //     this.print.text += `update(): swipe ${dumpDirectionStates(this.swipeInput)}\n`;
+        // }
+        // this.arrow = this.add.sprite(400, 300, 'red_arrow');
+        // this.arrow.anchor.setTo(0.5,0.5);
+        // this.arrow.scale.setTo(1, 1);
+
+
+        // DISPLAY random swipe direction
+        this.emitter.setPosition(this.input.x, this.input.y);
+
+
+        if (this.swipeInput.isSwiped) {
+
+            swipeDirection = dumpDirectionStates(this.swipeInput);
+            // CORRECT SWIPE
+            if (this.playerDirection === swipeDirection) {
+                count += 1;
+                this.emitter.setTint(0x008000);
+
+                // happy animation
+                cheer_up_bread(this);
+                increment_knead_success(this);
+            }
+        }
+        text.setText('Hits: ' + count);
+        roundCounter.setText(`Round ${roundCount}/4`)
+        // arrow.scale(-1, 1);
+        // var speed;
+        // speed = 5 * (count + 1);
+        // if (count >= 5) {
+        //     text.setText("You are such a smart cookie!");
+        // } else {
+        //     if (red.x >= 600 && red.y >= 200) {
+        //         red.x = 600;
+        //         red.y += speed;
+        //     }
+        //     if (red.x >= 200 && red.y >= 400) {
+        //         red.y = 400;
+        //         red.x -= speed;
+        //     }
+        //     if (red.x <= 200 && red.y <= 400) {
+        //         red.x = 200;
+        //         red.y -= speed;
+        //     }
+        //     if (red.x <= 600 && red.y <= 200) {
+        //         red.y = 200;
+        //         red.x += speed;
+        //     }
+        // }
+    }
+
+    function cheer_up_bread(context) {
+        context.happy_bread = context.add.sprite(400, 300, 'happy_bread').setScale(0.5);
+    }
+
+    function increment_knead_success(context) {
+        widthOffset = 35 * ( count - 1);
+        context.add.sprite(20 + widthOffset, 100, 'knead_success').setScale(0.05);
+    }
+
+    var directions = ['left', 'right', 'up', 'down'];
+
+    var promptDirections = ['left', 'right', 'up', 'down', 'leftup', 'leftdown', 'rightup', 'rightdown'];
+
+    var initialRound = true;
+    function displayGesturePrompt() {
+        if (initialRound) {
+            initialRound = false
+
+        } else {
+            roundCount += 1;
+        }
+        this.emitter.setTint(0xFF0000);
+        randomDirection = promptDirections[Math.floor(Math.random()*promptDirections.length)];
+        this.playerDirection = randomDirection;
+        this.promptText.setText('Now Swipe ' + randomDirection)
+
+        if (this.happy_bread) {
+            this.happy_bread.destroy()
+        }
+    }
+
+    var dumpDirectionStates = function (swipe) {
+        var s = '';
+        var dir;
+        for (var i = 0, cnt = directions.length; i < cnt; i++) {
+            dir = directions[i];
+            if (swipe[dir]) {
+                s += dir;
+            }
+        }
+        return s;
+    }
+    </script>
+
+</body>
+</html>
