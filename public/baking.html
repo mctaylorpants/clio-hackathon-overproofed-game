@@ -24,7 +24,8 @@
     };
 
     var game = new Phaser.Game(config);
-    let oven;
+    let oven_open;
+    let oven_close;
     function preload ()
     {
         this.load.image('background', "assets/baking/bg-baking.png");
@@ -36,13 +37,24 @@
     {
         oven_close = this.add.image(960, 530, 'oven-close');
         oven_open = this.add.image(960, 530, 'oven-open');
+        closeOven();
+
         oven_close.setInteractive();
         oven_open.setInteractive();
+
+        oven_close.on("pointerdown", openOven);
+        oven_open.on("pointerdown", closeOven);
+
     }
 
-    function toggleOven(){
-        oven.visible = !oven.visible;
+    function openOven() {
+        oven_open.visible = true;
     }
+
+    function closeOven() {
+        oven_open.visible = false;
+    }
+
 
     function update() {
 
