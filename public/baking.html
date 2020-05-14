@@ -30,6 +30,10 @@
     let bakingPercentage = 0;
     let temperature = 0;
 
+    var rect1;
+    var rect2;
+    var graphics;
+
     function preload ()
     {
         this.load.image('background', "assets/baking/bg-baking.png");
@@ -38,6 +42,7 @@
         this.load.image('sourdough-flour', 'assets/baking/sourdough-flour.jpg');
         this.load.image('button-close', "assets/baking/close.png");
         this.load.image('button-open', "assets/baking/open.png");
+        this.load.image('block', 'assets/baking/block.png');
     }
 
     function create ()
@@ -65,6 +70,22 @@
         oven_close.on("pointerdown", openOven);
         oven_open.on("pointerdown", closeOven);
         console.log(temperature);
+
+        graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
+        lever_block = this.physics.add.image(1310,300, 'block').setScale(1, 0.5);
+
+        rect1 = new Phaser.Geom.Rectangle(1300, 200, 20, 200);
+        // rect2 = new Phaser.Geom.Rectangle(1285, 300, 50, 20);
+
+        graphics.clear();
+        graphics.fillRectShape(rect1);
+
+        lever_block.setInteractive({draggable: true})
+            .on("drag", function(pointer, x, y) {
+                let y_position = (y < 200) ? 200: y;
+                y_position = (y_position > 400 ) ? 400: y_position;
+                lever_block.setPosition(1313,y_position);
+            });
     }
 
     function openOven() {
@@ -96,7 +117,6 @@
     }
 
     function update() {
-
     }
     </script>
 
