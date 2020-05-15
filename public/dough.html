@@ -55,6 +55,16 @@
       this.load.image('water-button', 'assets/container_water.png');
       this.load.image('flour-button', 'assets/flour.png');
       this.load.image('next-button', 'assets/right_sourdough_arrow.png');
+
+      this.load.image('clock0', 'assets/dough/clocks/clock0.png');
+      this.load.image('clock1', 'assets/dough/clocks/clock1.png');
+      this.load.image('clock2', 'assets/dough/clocks/clock2.png');
+      this.load.image('clock3', 'assets/dough/clocks/clock3.png');
+      this.load.image('clock4', 'assets/dough/clocks/clock4.png');
+      this.load.image('clock5', 'assets/dough/clocks/clock5.png');
+      this.load.image('clock6', 'assets/dough/clocks/clock6.png');
+      this.load.image('clock7', 'assets/dough/clocks/clock7.png');
+
       this.load.spritesheet('water',
         'assets/water-small.png',
         { frameWidth: 100, frameHeight: 100 }
@@ -78,6 +88,9 @@
     var soundWater;
     var soundFlour;
     var buttonNext;
+    var startTimerText;
+    var timerStarted = false;
+    var timerState = 1;
 
     function create ()
     {
@@ -87,23 +100,42 @@
         }
       });
 
+      this.anims.create({
+          key: 'tickingClocks',
+          frames: [{ key: 'clock0' }, { key: 'clock1' }, { key: 'clock2' }, { key: 'clock3' }, { key: 'clock4' }, { key: 'clock5' }, { key: 'clock6' }, { key: 'clock7' }, { key: 'clock0' }],
+          frameRate: 1,
+          repeat: 0,
+      });
+
       platforms = this.physics.add.staticGroup();
       platforms.create(420, 410, 'ground').setScale(2).refreshBody();
       this.add.image(480, 270, 'background').setDisplaySize(960, 540);
+      dough = this.add.image(500, 330, 'dough-xs').setDisplaySize(400, 300)
+      initializeTimer();
+      initializeDough();
+      test = this.physics.add.sprite(433, 65, 'clock0').setDisplaySize(220, 165);
+      test.setImmovable(true);
+      test.body.setAllowGravity(false);
+
       buttonNext = this.add.image(910, 495, 'next-button').setScale(0.07);
       buttonNext.setInteractive().on('pointerup', function () {
         window.location.href = '/stage_three.html';
       });
       buttonNext.visible = false;
-      showNextButton(8000);
-      dough = this.add.image(500, 330, 'dough-xs').setDisplaySize(400, 300)
-      initializeDough();
+
     }
 
     function showNextButton(timeDelay) {
       intervalButton = setInterval(function() {
         buttonNext.visible = true;
       }, timeDelay);
+    }
+
+    function initializeTimer() {
+      startTimerText = game.scene.scenes[0].add.text(225, 470, "", { fontSize: '16px', fill: '#000'});
+
+      startTimerText.setInteractive();
+      startTimerText.on('pointerdown', startTimer);
     }
 
     function initializeDough() {
@@ -114,7 +146,7 @@
     function initializeWater() {
       this.soundWater = game.sound.add('pour_water');
       scoreTextWater = game.scene.scenes[0].add.text(16, 150, 'Water: 0g/1000g', { fontFamily: 'AmaticSC-Bold', fontSize: '32px', fill: '#c3884c' });
-      const waterButton = game.scene.scenes[0].add.image(100, 400, 'water-button').setScale(2.0);
+      var waterButton = game.scene.scenes[0].add.image(100, 400, 'water-button').setScale(2.0);
 
       waterButton.setInteractive();
       waterButton.on('pointerdown', onPointerDownWater);
@@ -125,7 +157,7 @@
     function initializeFlour() {
       this.soundFlour = game.sound.add('pour_flour');
       scoreTextFlour = game.scene.scenes[0].add.text(675, 150, 'Flour: 0g/1000g', { fontFamily: 'AmaticSC-Bold', fontSize: '32px', fill: '#c3884c' });
-      const flourButton = game.scene.scenes[0].add.image(900, 380, 'flour-button').setScale(1.50);
+      var flourButton = game.scene.scenes[0].add.image(900, 380, 'flour-button').setScale(1.50);
 
       flourButton.setInteractive();
       flourButton.on('pointerdown', onPointerDownFlour);
@@ -136,6 +168,23 @@
     function playSound(itemToPlay, itemScore, threshold) {
       (itemScore < threshold) ? itemToPlay.play(): null;
     }
+
+    function startTimer() {
+      timerStarted = true;
+      test.play('tickingClocks');
+      dough.setDisplaySize(1000, 1000)
+
+      var timesDoughRisingRun = 0;
+      doughRisingInterval = setInterval(function() {
+        timesDoughRisingRun++;
+        timerState++;
+
+        if (timesDoughRisingRun === 8) {
+          clearInterval(doughRisingInterval);
+          showNextButton(1000);
+        }
+      }, 1000)
+    };
 
     function onPointerDownWater() {
       playSound(game.sound.sounds[0], scoreWater, 1000);
@@ -165,28 +214,18 @@
 
     function addWater() {
       console.log("Button clicked. scoreWater: " + scoreWater);
-      if (scoreWater < 1000) {
-        scoreWater += 1;
-        tester = game.scene.scenes[0].physics.add.sprite(500, 0, 'water');
-        game.scene.scenes[0].physics.add.collider(tester, platforms);
-        scoreTextWater.setText('Water: ' + scoreWater + 'g/1000g');
-      }
-      else {
-        this.onPointerOut();
-      }
+      scoreWater += 1;
+      tester = game.scene.scenes[0].physics.add.sprite(500, 0, 'water');
+      game.scene.scenes[0].physics.add.collider(tester, platforms);
+      scoreTextWater.setText('Water: ' + scoreWater + 'g/800g');
     }
 
     function addFlour() {
       console.log("Button clicked. scoreFlour: " + scoreFlour);
-      if (scoreFlour < 1000) {
-        scoreFlour += 1;
-        tester = game.scene.scenes[0].physics.add.sprite(500, 0, 'flour');
-        game.scene.scenes[0].physics.add.collider(tester, platforms);
-        scoreTextFlour.setText('Flour: ' + scoreFlour + 'g/1000g');
-      }
-      else {
-        this.onPointerOut();
-      }
+      scoreFlour += 1;
+      tester = game.scene.scenes[0].physics.add.sprite(500, 0, 'flour');
+      game.scene.scenes[0].physics.add.collider(tester, platforms);
+      scoreTextFlour.setText('Flour: ' + scoreFlour + 'g/1000g');
     }
 
     function update ()
@@ -205,21 +244,32 @@
       } else if (combinedTotal > 1900 || scoreFlour > 1050 || scoreWater > 850) {
         dough.setDisplaySize(600, 450);
       }
-    }
 
+      if (scoreFlour > 1000 && scoreWater > 800) {
+        startTimerText.setText("Okay, that's enough. Click here to let the dough rise!");
+      }
+
+      if (timerStarted) {
+        console.log("Timer state: ", timerState)
+        console.log(dough.displayWidth + (timerState * 50));
+        console.log(dough.displayHeight + (timerState * 50));
+        dough.setDisplaySize(dough.displayWidth + (timerState * 70), dough.displayHeight + (timerState * 70));
+      }
+    }
     </script>
-  <div id="container" style="display: flex;flex-direction: column;align-items: center;margin-top: 20px">
-    <div id="ui" style="margin-bottom: 20px; width:960px; display: flex; justify-content: left">
-      <div>
-        <a href="index.html">
-          <img src="assets/back.png" width="60" />
-        </a>
+
+    <div id="container" style="display: flex;flex-direction: column;align-items: center;margin-top: 20px">
+      <div id="ui" style="margin-bottom: 20px; width:960px; display: flex; justify-content: left">
+        <div>
+          <a href="index.html">
+            <img src="assets/back.png" width="60" />
+          </a>
+        </div>
+        <div>
+          <img src="assets/title/create_dough_title.png" width="590"/>
+        </div>
       </div>
-      <div>
-        <img src="assets/title/create_dough_title.png" width="590"/>
-      </div>
-    </div>
     <div id="game">
     </div>
-</body>
+  </body>
 </html>
