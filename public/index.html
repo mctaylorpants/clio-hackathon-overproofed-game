@@ -1,40 +1,130 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!DOCTYPE html>
+<html>
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser-arcade-physics.min.js"></script>
+</head>
 
-    <title>🍞 Overproofed</title>
-  </head>
-  <body>
-    <div class="container">
-      <div class="row mt-5">
-        <h1>Overproofed: A Game about Sourdough</h1>
-      </div>
+<body>
+  
 
-      <div class="row">
-        <div class="col-sm d-flex justify-content-right">
-          <img width="75%" src="assets/mascot.gif" />
-        </div>
-        <div class="col-sm d-flex flex-column justify-content-center">
-          <ol>
-            <li><a href="starter.html">Feeding your starter</a></li>
-            <li><a href="dough.html">Making the dough</a></li>
-            <li><a href="stage_three.html">Shaping the dough</a></li>
-            <li><a href="baking.html">Baking!</a></li>
-          </ol>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm">
-          <p>Made with 💧🌼❤️ by <a href="https://clio.slack.com/archives/C013AP8RG4E" target="_blank">team overproofed</a></p>
-        </div>
-      </div>
+  <script>
+    var config = {
+      type: Phaser.AUTO,
+      width: 960,
+      height: 540,
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 0 }
+        }
+      },
+      scene: {
+        preload: preload,
+        create: create,
+        update: update
+      }
+    };
 
-    </div>
-  </body>
+    var game = new Phaser.Game(config);
+
+
+    function preload() {
+      this.load.image('background', 'assets/starter-background.png');
+      this.load.image('mascot1', 'assets/title/mascot1.png');
+      this.load.image('mascot2', 'assets/title/mascot2.png');
+      this.load.image('mascot3', 'assets/title/mascot3.png');
+      this.load.image('mascot4', 'assets/title/mascot4.png');
+      this.load.image('mascot5', 'assets/title/mascot5.png');
+      this.load.image('title', 'assets/title/title.png');
+      this.load.image('vegan', 'assets/title/vegan_gluten_free.png');
+      this.load.image('calories', 'assets/title/zero_calories.png')
+
+      this.load.image('part1', 'assets/title/part1.png')
+      this.load.image('part2', 'assets/title/part2.png')
+      this.load.image('part3', 'assets/title/part3.png')
+      this.load.image('part4', 'assets/title/part4.png')
+    }
+
+    function create() {
+      this.cameras.main.setBackgroundColor("#fff")
+      bg = this.add.image(480, 270, 'background').setDisplaySize(960, 540);
+      bg.setAlpha(0.09)
+
+      this.add.image(480, 100, 'title')
+
+      vegan = this.add.image(300, 275, 'vegan').setRotation(-0.2)
+      this.tweens.add({
+        targets: vegan,
+        duration: 1000,
+        ease: "Linear",
+        loop: -1,
+        rotation: 0.2,
+        yoyo: true
+      })
+
+      calories = this.add.image(650, 280, 'calories').setRotation(0.2)
+      this.tweens.add({
+        targets: calories,
+        duration: 1000,
+        ease: "Linear",
+        loop: -1,
+        rotation: -0.2,
+        yoyo: true
+      })
+
+
+      this.anims.create({
+        key: 'mascotAnim',
+        frames: [ { key: 'mascot1' }, { key: 'mascot2' }, { key: 'mascot3' }, { key: 'mascot4' }, { key: 'mascot5' }],
+        frameRate: 2,
+        repeat: -1
+      })
+      this.add.sprite(480, 270, 'mascot3').setScale(0.25).play('mascotAnim')
+
+
+      part1 = this.add.image(350,400, 'part1').setScale(0.5)
+      part2 = this.add.image(700,400, 'part2').setScale(0.5)
+      part3 = this.add.image(350,450, 'part3').setScale(0.5)
+      part4 = this.add.image(625,450, 'part4').setScale(0.5)
+
+      this.add.text(350, 500, 'Made with 💧🌼❤️ by team overproofed', { fontSize: '12px', fill: '#666' });
+
+      part1.setInteractive()
+        .on('pointerup', function () {
+          window.location.href = '/starter.html';
+        });
+
+      part2.setInteractive()
+      .on('pointerup', function () {
+        window.location.href = '/dough.html';
+      });
+
+      part3.setInteractive()
+        .on('pointerup', function () {
+          window.location.href = '/stage_three.html';
+        });
+
+      part4.setInteractive()
+      .on('pointerup', function () {
+        window.location.href = '/baking.html';
+      });
+
+
+
+
+
+
+
+
+    }
+
+    function update() {
+
+    }
+
+  </script>
+
+</body>
+
 </html>
