@@ -11,8 +11,8 @@
     <script>
     var config = {
         type: Phaser.AUTO,
-        width: 1920,
-        height: 1080,
+        width: 960,
+        height: 540,
         physics: {
             default: 'arcade',
             arcade: {
@@ -28,12 +28,12 @@
 
     var game = new Phaser.Game(config);
     var bakingTimer;
+    var temperature;
     let oven_open;
     let oven_close;
     let bakingState = false;
     let bakingPercentage = 0;
-    let temperature = 0;
-
+    let doughStatue = 0; // 0: temp too low 1: temp is good 2: temp too high
     var rect1;
     var rect2;
     var graphics;
@@ -41,34 +41,47 @@
     function preload ()
     {
         this.load.image('background', "assets/baking/bg-baking.png");
-        this.load.image('oven-close', "assets/baking/oven-close.jpg");
+        this.load.image('oven-close', "assets/baking/oven-close.png");
         this.load.image('oven-open', "assets/baking/oven-open.png");
-        this.load.image('sourdough-flour', 'assets/baking/sourdough-flour.jpg');
-        this.load.image('button-close', "assets/baking/close.png");
-        this.load.image('button-open', "assets/baking/open.png");
-        this.load.image('thumbup', "assets/baking/thumbup.jpg");
-        this.load.image('block', 'assets/baking/block.png');
+
+        this.load.image('sourdough-flour', 'assets/baking/sourdough-flour.png');
+        this.load.image('sourdough-done', 'assets/baking/sourdough-done.png');
+        this.load.image('sourdough-burn', 'assets/baking/sourdough-burn.png');
+        // this.load.image('button-close', "assets/baking/close.png");
+        // this.load.image('button-open', "assets/baking/open.png");
+        this.load.image('lever', 'assets/baking/lever.png');
+        this.load.image('lever-point', 'assets/baking/lever-point.png');
+        this.load.image('sleep1', "assets/baking/sleep1.png");
+        this.load.image('sleep2', "assets/baking/sleep2.png");
+        this.load.image('sweat', "assets/baking/sweat.png");
+        this.load.image('happy', "assets/baking/happy.png");
+        this.load.image('smile', "assets/baking/smile.png");
     }
 
     function create ()
     {
-        this.add.image(400, 300, 'background');
+        this.add.image(480, 270, 'background').setDisplaySize(960, 540);
 
-        oven_close = this.physics.add.image(960, 530, 'oven-close').setDisplaySize(400, 500);
-        oven_open = this.physics.add.image(960, 530, 'oven-open');
-        button_close = this.physics.add.image(960, 700, 'button-close');
-        button_open = this.physics.add.image(960, 700, 'button-open');
+        oven_close = this.physics.add.image(510, 335, 'oven-close').setDisplaySize(300, 170);
+        oven_open = this.physics.add.image(510, 335, 'oven-open').setDisplaySize(300, 170);
+        // button_close = this.physics.add.image(490, 350, 'button-close').setDisplaySize(80, 50);
+        // button_open = this.physics.add.image(490, 350, 'button-open').setDisplaySize(80, 50);
+        lever = this.physics.add.image(490, 350, 'lever').setDisplaySize(800, 650);
+        lever_point = this.physics.add.image(150, 272, 'lever-point').setDisplaySize(40, 85);
+        lever.visible = false;
+        lever_point.visible = false;
+        
+        face = this.physics.add.image(490, 275, 'sleep1').setDisplaySize(500, 400);
+        face.visible = false;
 
-        thumb_up = this.physics.add.image(960, 200, 'thumbup').setDisplaySize(200, 200);;
-        thumb_up.visible = false;
-
-        sourdough_flour = this.physics.add.sprite(400, 100,'sourdough-flour').setDisplaySize(160, 200);
+        sourdough = this.physics.add.sprite(450, 130,'sourdough-flour').setDisplaySize(320, 150);
         closeOven();
-        sourdough_flour
+
+        sourdough
             .setInteractive({ draggable: true })
             .on('drag', function(pointer, x, y) {
-                sourdough_flour.setPosition(x, y);
-                isDoughInOven(sourdough_flour, oven_open)
+                sourdough.setPosition(x, y);
+                isDoughInOven(sourdough, oven_open);
             });
 
         oven_close.setInteractive();
@@ -98,29 +111,71 @@
 
     function openOven() {
         oven_open.visible = true;
-        button_close.visible = true;
-        button_open.visible = false;
+        oven_close.visible = false;
+        // button_close.visible = true;
+        // button_open.visible = false;
+
+        if(isDoughInOven(sourdough, oven_open)) {
+            sourdough.visible = true;
+            lever.visible = false;
+            lever_point.visible = false;
+            stopTemperature();
+            lever_point.x = 152;
+        }
     }
 
     function closeOven() {
         oven_open.visible = false;
-        button_close.visible = false;
-        button_open.visible = true;
+        oven_close.visible = true;
+        // button_close.visible = false;
+        // button_open.visible = true;
 
+        if(isDoughInOven(sourdough, oven_open)) {
+            sourdough.visible = false;
+            lever.visible = true;
+            lever_point.visible = true;
+            selectTemperature(lever_point)
+        }
     }
 
     function isInBakingState() {
         return bakingState;
     }
 
-    function isDoughInOven(sourdough_flour, oven_open) {
+    function selectTemperature(lever_point) {
+        temperature = setInterval(function() {
+            lever_point.x += 3;
+            if (lever_point.x > 850) {
+                lever_point.x = 152;
+            } 
+            document.body.onkeyup = function(e){
+                if(e.keyCode == 32 && bakingPercentage == 0){
+                    console.log(lever_point.x);
+                    stopTemperature();
+                    lever.visible = false;
+                    lever_point.visible = false;
+                    startBaking();
+                }
+            }
+        }, 10);
+    }
+
+    function stopTemperature() {
+        clearInterval(temperature);
+    }
+    
+
+    function isDoughInOven(sourdough, oven_open) {
         // closeOven();
         bakingState = true;
-        if (Math.abs(oven_open.x-sourdough_flour.x) < 50 && Math.abs(oven_open.y-sourdough_flour.y) < 10){
-            console.log(oven_open.x, oven_open.y, sourdough_flour.x, sourdough_flour.y);
+        if (Math.abs(oven_open.x-sourdough.x) < 100 && Math.abs(oven_open.y-sourdough.y) < 50){
+            // console.log(oven_open.x, oven_open.y, sourdough.x, sourdough.y);
+            sourdough.setDisplaySize(220, 100);
             return true;
+        } else {
+            sourdough.setDisplaySize(320, 150);
+            return false;
         }
-        return false
         //display temperature lever
     }
 
@@ -130,10 +185,41 @@
         bakingTimer = setInterval(function() {
             bakingPercentage += 1;
             document.getElementById("baking-percentage").innerHTML = bakingPercentage;
-            if (bakingPercentage > 90 && bakingPercentage <100) {
-                thumb_up.visible = true;
+            face.visible = true;
+
+            if (bakingPercentage == 100){
+                stopBaking();
+                console.log()
+                console.log(lever_point.x);
+                if (lever_point.x >560 && lever_point.x <760){
+                    sourdough
+                        .setTexture("sourdough-done")
+                        .setDisplaySize(220, 100);
+
+                    face
+                        .setTexture("happy")
+                        .setDisplaySize(500, 400);
+
+                } else if (lever_point.x >= 760){
+                    sourdough
+                        .setTexture("sourdough-burn")
+                        .setDisplaySize(220, 100);
+                    face
+                        .setTexture("sweat")
+                        .setDisplaySize(500, 400);
+                }
+            }
+            if (bakingPercentage > 80) {
+                face.visible = true;
+                face
+                    .setTexture("smile")
+                    .setDisplaySize(500, 400);
             } else {
-                thumb_up.visible = false;
+                if (bakingPercentage > 40) {
+                    face
+                        .setTexture("sleep2")
+                        .setDisplaySize(500, 400);
+                }
             }
         }, 70);
 
@@ -141,11 +227,14 @@
 
     function stopBaking() {
         clearInterval(bakingTimer);
+        bakingPercentage = 0;
     }
 
     function update() {
+
     }
     </script>
 
 </body>
 </html>
+ 
