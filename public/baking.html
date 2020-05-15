@@ -47,8 +47,13 @@
         this.load.image('sourdough-flour', 'assets/baking/sourdough-flour.png');
         this.load.image('sourdough-done', 'assets/baking/sourdough-done.png');
         this.load.image('sourdough-burn', 'assets/baking/sourdough-burn.png');
+
+        this.load.image('0', 'assets/baking/0.png');
+        this.load.image('1', 'assets/baking/1.png');
+        this.load.image('2', 'assets/baking/2.png');
+        this.load.image('3', 'assets/baking/3.png');
         // this.load.image('button-close', "assets/baking/close.png");
-        // this.load.image('button-open', "assets/baking/open.png");
+        this.load.image('button-open', "assets/baking/open.png");
         this.load.image('lever', 'assets/baking/lever.png');
         this.load.image('lever-point', 'assets/baking/lever-point.png');
         this.load.image('sleep1', "assets/baking/sleep1.png");
@@ -56,6 +61,9 @@
         this.load.image('sweat', "assets/baking/sweat.png");
         this.load.image('happy', "assets/baking/happy.png");
         this.load.image('smile', "assets/baking/smile.png");
+
+        this.load.image('mouth', "assets/baking/mouth.png");
+
     }
 
     function create ()
@@ -65,11 +73,20 @@
         oven_close = this.physics.add.image(510, 335, 'oven-close').setDisplaySize(300, 170);
         oven_open = this.physics.add.image(510, 335, 'oven-open').setDisplaySize(300, 170);
         // button_close = this.physics.add.image(490, 350, 'button-close').setDisplaySize(80, 50);
-        // button_open = this.physics.add.image(490, 350, 'button-open').setDisplaySize(80, 50);
+
+        button_open = this.physics.add.image(800, 400, 'button-open').setDisplaySize(200, 150);
+        button_open.visible = false;
+
         lever = this.physics.add.image(490, 350, 'lever').setDisplaySize(800, 650);
         lever_point = this.physics.add.image(150, 272, 'lever-point').setDisplaySize(40, 85);
         lever.visible = false;
         lever_point.visible = false;
+
+
+
+        mouth = this.physics.add.image(150, 450, 'mouth').setDisplaySize(200, 150);
+        mouth.visible = false;
+
         
         face = this.physics.add.image(490, 275, 'sleep1').setDisplaySize(500, 400);
         face.visible = false;
@@ -148,6 +165,11 @@
             if (lever_point.x > 850) {
                 lever_point.x = 152;
             } 
+
+
+            oven_open.disableInteractive();
+            oven_close.disableInteractive();
+
             document.body.onkeyup = function(e){
                 if(e.keyCode == 32 && bakingPercentage == 0){
                     console.log(lever_point.x);
@@ -200,6 +222,9 @@
                         .setTexture("happy")
                         .setDisplaySize(500, 400);
 
+                    doughStatue = 1; 
+
+
                 } else if (lever_point.x >= 760){
                     sourdough
                         .setTexture("sourdough-burn")
@@ -208,6 +233,14 @@
                         .setTexture("sweat")
                         .setDisplaySize(500, 400);
                 }
+
+
+                button_open.visible = true;
+                button_open
+                    .setInteractive({draggable: true})
+                    .on("pointerdown",finishBaking);
+
+
             }
             if (bakingPercentage > 80) {
                 face.visible = true;
@@ -228,6 +261,22 @@
     function stopBaking() {
         clearInterval(bakingTimer);
         bakingPercentage = 0;
+
+    }
+
+    function finishBaking(){
+        face.visible = false;
+        openOven();
+        button_open.visible = false;
+        if (doughStatue ==1 ){
+            mouth.visible = true;
+            mouth
+                .setInteractive()
+                .on("pointerdown", function(){
+                    sourdough.setTexture("3");
+                })
+        }
+
     }
 
     function update() {
