@@ -4,13 +4,12 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser-arcade-physics.min.js"></script>
 </head>
 <body>
-  <p><a href="index.html">< back</a></p>
-  <hr />
 
-    <p>Baking Percentage: <span id="baking-percentage">0</span>%  <button onclick="startBaking()">Test Baking</button><button onclick="stopBaking()">stop</button></p>
+
     <script>
     var config = {
         type: Phaser.AUTO,
+        parent: 'game',
         width: 960,
         height: 540,
         physics: {
@@ -283,7 +282,24 @@
 
     }
     </script>
+  <div id="container" style="display: flex;flex-direction: column;align-items: center;margin-top: 20px">
+    <div id="ui" style="margin-bottom: 20px; width:960px; display: flex; justify-content: left">
+      <div>
+        <a href="index.html">
+          <img src="assets/back.png" width="60" />
+        </a>
+      </div>
+      <div>
+        <img src="assets/title/baking_title.png" width="500"/>
+      </div>
 
+    </div>
+    <div style="font-family: sans-serif; color: rgb(100,48,7)">
+        <p>Baking Percentage: <span id="baking-percentage">0</span>%  <button onclick="startBaking()">Test Baking</button><button onclick="stopBaking()">stop</button></p>
+      </div>
+    <div id="game">
+    </div>
+  </div>
 </body>
 </html>
  
