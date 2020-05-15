@@ -38,6 +38,7 @@
     var jarFace;
     var jarLidCollision;
     var lid;
+    var next;
     var reset;
     var water;
     var waterScore;
@@ -66,6 +67,10 @@
       x: 50,
       y: 495
     };
+    var nextInitialPosition = {
+      x: 910,
+      y: 495
+    }
 
     var starter = {
       currentWaterAmount: 0,
@@ -130,6 +135,8 @@
 
           scene = game.scene.scenes[0]
           scene.add.text(270, 270, "Huzzah, your starter is feeding!", { fontSize: '25px', color: "green", backgroundColor: "#fff" })
+
+          next.visible = true
         }
       }
     }
@@ -144,6 +151,7 @@
       this.load.image('flour', 'assets/flour-final.png');
       this.load.image('jar', 'assets/jar2.png');
       this.load.image('lid', 'assets/lid2.png');
+      this.load.image('next', 'assets/right_sourdough_arrow.png');
       this.load.image('reset', 'assets/reset2.png');
       this.load.image('water', 'assets/water2.png');
 
@@ -159,7 +167,7 @@
     function create() {
       this.anims.create({
         key: 'emptyMeasuringCup',
-        frames: [ { key: 'measuringCup5' }, { key: 'measuringCup4' }, { key: 'measuringCup3' }, { key: 'measuringCup2' }, { key: 'measuringCup1' }],
+        frames: [{ key: 'measuringCup5' }, { key: 'measuringCup4' }, { key: 'measuringCup3' }, { key: 'measuringCup2' }, { key: 'measuringCup1' }],
         frameRate: 8,
         repeat: -1
       })
@@ -172,7 +180,7 @@
       lid = this.physics.add.image(750, 350, 'lid').setScale(0.27);
       reset = this.physics.add.image(resetInitialPosition.x, resetInitialPosition.y, 'reset').setScale(0.07);
       water = this.physics.add.sprite(waterInitialPosition.x, waterInitialPosition.y, 'measuringCup5');
-      
+      next = this.physics.add.image(nextInitialPosition.x, nextInitialPosition.y, 'next').setScale(0.07);
 
       // audio sounds
       bubblingSound = this.sound.add('bubbling', { loop: true });
@@ -181,16 +189,17 @@
       var pourWater = this.sound.add('pour_water');
 
       lid.visible = false;
+      next.visible = false;
 
       // water object behaviours
       water.setInteractive({ draggable: true })
-        .on('dragstart', function() {
+        .on('dragstart', function () {
           water.play('emptyMeasuringCup');
         })
         .on('drag', function (pointer, x, y) {
           water.setPosition(x, y);
         })
-        .on('dragend', function() { 
+        .on('dragend', function () {
           water.anims.stop();
         })
 
@@ -240,10 +249,16 @@
           jarFace.setText('😴');
         });
 
+      // next object bahviours
+      next
+        .setInteractive()
+        .on('pointerup', function () {
+          window.location.href = '/dough.html';
+        });
 
       // score objects
 
-      
+
 
 
       waterScore = this.add.text(16, 16, '', { fontSize: '32px', fill: '#000' });
