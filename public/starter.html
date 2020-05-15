@@ -6,7 +6,9 @@
 </head>
 
 <body>
-  <p><a href="index.html">< back</a></p>
+  <p><a href="index.html">
+      < back</a>
+  </p>
   <hr />
   <h3>To begin, your starter needs 100g each of water and flour. Put the lid on when you're finished.</h3>
 
@@ -29,18 +31,16 @@
     };
 
     var game = new Phaser.Game(config);
-    var waterScore;
-    var flourScore;
-
+    var bubblingSound;
     var flour;
-
+    var flourScore;
     var jar;
     var jarFace;
     var jarLidCollision;
     var lid;
     var reset;
     var water;
-    var bubblingSound;
+    var waterScore;
 
     var setWaterScore = function (amount) {
       waterScore.setText(`Water: ${Math.round(amount)}g`);
@@ -52,19 +52,19 @@
 
     var jarInitialPosition = {
       x: 480,
-      y: 270
+      y: 300
     }
     var waterInitialPosition = {
-      x: 50,
-      y: 475
+      x: 230,
+      y: 455
     };
     var flourInitialPosition = {
-      x: 900,
-      y: 475
+      x: 770,
+      y: 455
     };
     var resetInitialPosition = {
-      x: 480,
-      y: 475
+      x: 50,
+      y: 495
     };
 
     var starter = {
@@ -86,7 +86,6 @@
 
       changeEmotion: function () {
         var combinedAmount = this.currentWaterAmount + this.currentFlourAmount;
-        // console.log(`Combined %: ${combinedAmount}`)
         if (this.currentWaterAmount >= 110 || this.currentFlourAmount >= 110) {
           jarFace.setText('😱')
           console.log("way too much!")
@@ -108,19 +107,17 @@
         }
       },
 
-      revealLid: function () {
-
-      },
-
       reset: function () {
         this.currentFlourAmount = 0;
         this.currentWaterAmount = 0;
       },
 
       complete: function (jar, lid) {
-        var jarTopThreshold = jar.getTopCenter().y + 20;
+        var jarTopStart = jar.getTopCenter().y;
+        var jarTopEnd = jar.getTopCenter().y + 20;
+
         var lidTopCenter = lid.getTopCenter().y;
-        if (lidTopCenter < jar.getTopCenter().y && lidTopCenter < jarTopThreshold) {
+        if (lidTopCenter > jarTopStart && lidTopCenter < jarTopEnd) {
           jarLidCollision.destroy();
           lid.disableInteractive();
           reset.disableInteractive();
@@ -128,45 +125,48 @@
           water.disableInteractive();
           lid.setPosition(jar.getTopCenter().x, jar.getTopCenter().y)
           console.log("complete!!");
-          
+
           bubblingSound.play();
-          
+
           scene = game.scene.scenes[0]
-          scene.add.text(300, 270, "Huzzah, your starter is feeding!", { fontSize: '25px', color: "green", backgroundColor: "#fff" })
+          scene.add.text(270, 270, "Huzzah, your starter is feeding!", { fontSize: '25px', color: "green", backgroundColor: "#fff" })
         }
       }
     }
 
     function preload() {
-      this.load.image('background', 'assets/starter-background.png');
-      this.load.image('jar', 'assets/jar.png');
-      this.load.image('flour', 'assets/flour-final.png');
-      this.load.image('water', 'assets/water-final.png');
-      this.load.image('reset', 'assets/reset.png');
-      this.load.image('lid', 'assets/lid.png');
+      this.load.audio('bubbling', 'assets/starter-bubbling.mp3');
+      this.load.audio('overcooked_intro', 'assets/overcooked_intro.mp3');
       this.load.audio('pour_flour', 'assets/pour_flour.mp3');
       this.load.audio('pour_water', 'assets/pour_water.mp3');
-      this.load.audio('overcooked_intro', 'assets/overcooked_intro.mp3');
-      this.load.audio('bubbling', 'assets/starter-bubbling.mp3');
+      this.load.image('background', 'assets/starter-background.png');
+      this.load.image('flour', 'assets/flour-final.png');
+      this.load.image('jar', 'assets/jar2.png');
+      this.load.image('lid', 'assets/lid2.png');
+      this.load.image('reset', 'assets/reset2.png');
+      this.load.image('water', 'assets/water2.png');
     }
 
     function create() {
-      
+      // starter objects
       background = this.add.image(480, 270, 'background').setDisplaySize(960, 540);
-      jar = this.physics.add.image(jarInitialPosition.x, jarInitialPosition.y, 'jar');
+      jar = this.physics.add.image(jarInitialPosition.x, jarInitialPosition.y, 'jar').setScale(0.25);
       jarFace = this.add.text(430, jarInitialPosition.y, '😴', { fontSize: '100px' })
       flour = this.physics.add.image(flourInitialPosition.x, flourInitialPosition.y, 'flour');
-      water = this.physics.add.image(waterInitialPosition.x, waterInitialPosition.y, 'water').setDisplaySize(80, 100);
-      lid = this.physics.add.image(800, 400, 'lid').setScale(0.27);
+      lid = this.physics.add.image(750, 350, 'lid').setScale(0.27);
+      reset = this.physics.add.image(resetInitialPosition.x, resetInitialPosition.y, 'reset').setScale(0.07);
+      water = this.physics.add.image(waterInitialPosition.x, waterInitialPosition.y, 'water');
+
+      // audio sounds
+      bubblingSound = this.sound.add('bubbling', { loop: true });
+      var backgroundMusic = this.sound.add('overcooked_intro', { volume: 0.4 });
+      var pourFlour = this.sound.add('pour_flour');
+      var pourWater = this.sound.add('pour_water');
+
       lid.visible = false;
 
-      reset = this.physics.add.image(resetInitialPosition.x, resetInitialPosition.y, 'reset').setDisplaySize(75, 75);
-
-
-      var pourWater = this.sound.add('pour_water');
-      bubblingSound = this.sound.add('bubbling', { loop: true });
-      water
-        .setInteractive({ draggable: true })
+      // water object behaviours
+      water.setInteractive({ draggable: true })
         .on('drag', function (pointer, x, y) {
           water.setPosition(x, y);
         });
@@ -179,6 +179,7 @@
         pourWater.stop();
       });
 
+      // jar object behaviours
       jar.once('readyToRise', function () {
         console.log("ready to rise")
         lid.visible = true;
@@ -189,7 +190,7 @@
           });
       });
 
-      var pourFlour = this.sound.add('pour_flour');
+      // flour object behaviours
       flour
         .setInteractive({ draggable: true })
         .on('drag', function (pointer, x, y) {
@@ -204,6 +205,7 @@
         pourFlour.stop();
       });
 
+      // reset object behaviours
       reset
         .setInteractive()
         .on('pointerup', function () {
@@ -215,11 +217,7 @@
           jarFace.setText('😴');
         });
 
-
-      this.physics.add.overlap(jar, water, starter.addWater, null, starter);
-      this.physics.add.overlap(jar, flour, starter.addFlour, null, starter);
-      jarLidCollision = this.physics.add.overlap(jar, lid, starter.complete, null, starter);
-
+      // score objects
       waterScore = this.add.text(16, 16, '', { fontSize: '32px', fill: '#000' });
       waterScore.setBackgroundColor("#fff")
       flourScore = this.add.text(750, 16, '', { fontSize: '32px', fill: '#000', align: 'right' });
@@ -227,7 +225,11 @@
       setWaterScore(0);
       setFlourScore(0);
 
-      var backgroundMusic = this.sound.add('overcooked_intro');
+      // initialize physics between objects
+      this.physics.add.overlap(jar, water, starter.addWater, null, starter);
+      this.physics.add.overlap(jar, flour, starter.addFlour, null, starter);
+      jarLidCollision = this.physics.add.overlap(jar, lid, starter.complete, null, starter);
+
       backgroundMusic.play();
     }
 
