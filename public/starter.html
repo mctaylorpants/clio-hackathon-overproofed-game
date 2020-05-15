@@ -139,15 +139,31 @@
       this.load.audio('overcooked_intro', 'assets/overcooked_intro.mp3');
       this.load.audio('pour_flour', 'assets/pour_flour.mp3');
       this.load.audio('pour_water', 'assets/pour_water.mp3');
+
       this.load.image('background', 'assets/starter-background.png');
       this.load.image('flour', 'assets/flour-final.png');
       this.load.image('jar', 'assets/jar2.png');
       this.load.image('lid', 'assets/lid2.png');
       this.load.image('reset', 'assets/reset2.png');
       this.load.image('water', 'assets/water2.png');
+
+
+      this.load.image('measuringCup1', 'assets/measuringcup1.png');
+      this.load.image('measuringCup2', 'assets/measuringcup2.png');
+      this.load.image('measuringCup3', 'assets/measuringcup3.png');
+      this.load.image('measuringCup4', 'assets/measuringcup4.png');
+      this.load.image('measuringCup5', 'assets/measuringcup5.png');
+
     }
 
     function create() {
+      this.anims.create({
+        key: 'emptyMeasuringCup',
+        frames: [ { key: 'measuringCup5' }, { key: 'measuringCup4' }, { key: 'measuringCup3' }, { key: 'measuringCup2' }, { key: 'measuringCup1' }],
+        frameRate: 8,
+        repeat: -1
+      })
+
       // starter objects
       background = this.add.image(480, 270, 'background').setDisplaySize(960, 540);
       jar = this.physics.add.image(jarInitialPosition.x, jarInitialPosition.y, 'jar').setScale(0.25);
@@ -155,7 +171,8 @@
       flour = this.physics.add.image(flourInitialPosition.x, flourInitialPosition.y, 'flour');
       lid = this.physics.add.image(750, 350, 'lid').setScale(0.27);
       reset = this.physics.add.image(resetInitialPosition.x, resetInitialPosition.y, 'reset').setScale(0.07);
-      water = this.physics.add.image(waterInitialPosition.x, waterInitialPosition.y, 'water');
+      water = this.physics.add.sprite(waterInitialPosition.x, waterInitialPosition.y, 'measuringCup5');
+      
 
       // audio sounds
       bubblingSound = this.sound.add('bubbling', { loop: true });
@@ -167,9 +184,15 @@
 
       // water object behaviours
       water.setInteractive({ draggable: true })
+        .on('dragstart', function() {
+          water.play('emptyMeasuringCup');
+        })
         .on('drag', function (pointer, x, y) {
           water.setPosition(x, y);
-        });
+        })
+        .on('dragend', function() { 
+          water.anims.stop();
+        })
 
       water.on('overlapstart', function () {
         pourWater.play();
@@ -217,7 +240,12 @@
           jarFace.setText('😴');
         });
 
+
       // score objects
+
+      
+
+
       waterScore = this.add.text(16, 16, '', { fontSize: '32px', fill: '#000' });
       waterScore.setBackgroundColor("#fff")
       flourScore = this.add.text(750, 16, '', { fontSize: '32px', fill: '#000', align: 'right' });
