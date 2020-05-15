@@ -10,7 +10,17 @@
       < back</a>
   </p>
   <hr />
-  <h3>To begin, your starter needs 100g each of water and flour. Put the lid on when you're finished.</h3>
+  <style>
+    @font-face {
+      font-family: "AmaticSC-Regular";
+      src: url("assets/fonts/AmaticSC-Regular.ttf") format("truetype");
+    }
+
+    @font-face {
+      font-family: "AmaticSC-Bold";
+      src: url("assets/fonts/AmaticSC-Bold.ttf") format("truetype");
+    }
+  </style>
 
   <script>
     var config = {
@@ -171,9 +181,17 @@
       this.load.image('measuringCup3', 'assets/measuringcup3.png');
       this.load.image('measuringCup4', 'assets/measuringcup4.png');
       this.load.image('measuringCup5', 'assets/measuringcup5.png');
+
+      this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
     }
 
     function create() {
+      WebFont.load({
+        custom: {
+          families: ['AmaticSC-Regular', 'AmaticSC-Bold']
+        }
+      });
+
       this.anims.create({
         key: 'emptyMeasuringCup',
         frames: [{ key: 'measuringCup5' }, { key: 'measuringCup4' }, { key: 'measuringCup3' }, { key: 'measuringCup2' }, { key: 'measuringCup1' }],
@@ -267,11 +285,8 @@
           window.location.href = '/dough.html';
         });
 
-      // score objects
-      waterScore = this.add.text(16, 16, '', { fontSize: '32px', fill: '#000' });
-      waterScore.setBackgroundColor("#fff")
-      flourScore = this.add.text(750, 16, '', { fontSize: '32px', fill: '#000', align: 'right' });
-      flourScore.setBackgroundColor("#fff")
+      waterScore = this.add.text(16, 180, '', { fontFamily: 'AmaticSC-Bold', fontSize: '32px', fill: '#c3884c' });
+      flourScore = this.add.text(840, 180, '', { fontFamily: 'AmaticSC-Bold', fontSize: '32px', fill: '#c3884c', align: 'right' });
       setWaterScore(0);
       setFlourScore(0);
 
