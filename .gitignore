@@ -116,4 +116,8 @@ dist
 .yarn/build-state.yml
 .pnp.*
 
+.DS_STORE
+
+public/.DS_Store
+
 .idea/
