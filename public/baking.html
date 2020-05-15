@@ -20,7 +20,6 @@
         scene: {
             preload: preload,
             create: create,
-            update: update,
         }
     };
 
@@ -32,9 +31,10 @@
     let bakingState = false;
     let bakingPercentage = 0;
     let doughStatue = 0; // 0: temp too low 1: temp is good 2: temp too high
-    var rect1;
-    var rect2;
-    var graphics;
+    var resetInitialPosition = {
+      x: 50,
+      y: 495
+    };
 
     function preload ()
     {
@@ -62,11 +62,15 @@
 
         this.load.image('mouth', "assets/baking/mouth.png");
 
+        this.load.image('reset', 'assets/reset2.png');
+
     }
 
     function create ()
     {
         this.add.image(480, 270, 'background').setDisplaySize(960, 540);
+
+        reset = this.physics.add.image(resetInitialPosition.x, resetInitialPosition.y, 'reset').setScale(0.07);
 
         oven_close = this.physics.add.image(510, 335, 'oven-close').setDisplaySize(300, 170);
         oven_open = this.physics.add.image(510, 335, 'oven-open').setDisplaySize(300, 170);
@@ -82,7 +86,7 @@
 
 
 
-        mouth = this.physics.add.image(150, 450, 'mouth').setDisplaySize(200, 150);
+        mouth = this.physics.add.image(250, 450, 'mouth').setDisplaySize(200, 150);
         mouth.visible = false;
 
         
@@ -115,11 +119,36 @@
         graphics.clear();
         graphics.fillRectShape(rect1);
 
-        lever_block.setInteractive({draggable: true})
+        lever_block
+            .setInteractive({draggable: true})
             .on("drag", function(pointer, x, y) {
                 let y_position = (y < 200) ? 200: y;
                 y_position = (y_position > 400 ) ? 400: y_position;
                 lever_block.setPosition(1313,y_position);
+            });
+
+        // reset object behaviours
+        reset
+            .setInteractive()
+            .on('pointerup', function () {
+                mouth.visible = false;
+                sourdough.visible = true;
+                sourdough
+                    .setTexture("sourdough-flour")
+                    .setPosition(450, 130);
+                openOven();
+                stopBaking();
+                oven_close.setInteractive();
+                oven_open.setInteractive(); 
+                face.visible = false;
+                face
+                    .setTexture("sleep1");
+
+                lever.visible = false;
+                lever_point.visible = false;
+                lever_point.x = 152;
+                button_open.visible = false;
+                
             });
 
     }
@@ -283,9 +312,6 @@
 
     }
 
-    function update() {
-
-    }
     </script>
   <div id="container" style="display: flex;flex-direction: column;align-items: center;margin-top: 20px">
     <div id="ui" style="margin-bottom: 20px; width:960px; display: flex; justify-content: left">
@@ -299,9 +325,7 @@
       </div>
 
     </div>
-    <div style="font-family: sans-serif; color: rgb(100,48,7)">
-        <p>Baking Percentage: <span id="baking-percentage">0</span>%  <button onclick="startBaking()">Test Baking</button><button onclick="stopBaking()">stop</button></p>
-      </div>
+    
     <div id="game">
     </div>
   </div>
