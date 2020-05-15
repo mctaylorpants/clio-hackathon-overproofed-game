@@ -5,7 +5,6 @@
 </head>
 <body>
 
-
     <script>
     var config = {
         type: Phaser.AUTO,
@@ -91,7 +90,7 @@
         face.visible = false;
 
         sourdough = this.physics.add.sprite(450, 130,'sourdough-flour').setDisplaySize(320, 150);
-        closeOven();
+        openOven();
 
         sourdough
             .setInteractive({ draggable: true })
@@ -205,7 +204,6 @@
 
         bakingTimer = setInterval(function() {
             bakingPercentage += 1;
-            document.getElementById("baking-percentage").innerHTML = bakingPercentage;
             face.visible = true;
 
             if (bakingPercentage == 100){
@@ -268,11 +266,18 @@
         openOven();
         button_open.visible = false;
         if (doughStatue ==1 ){
+
+            var num = 3;
+
             mouth.visible = true;
             mouth
                 .setInteractive()
                 .on("pointerdown", function(){
-                    sourdough.setTexture("3");
+                    if (num >=0) {
+                        sourdough.setTexture(num.toString());
+                        num -= 1;
+                    }
+
                 })
         }
 
