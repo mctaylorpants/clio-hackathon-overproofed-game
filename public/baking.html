@@ -42,6 +42,7 @@
         this.load.audio('open-close', 'assets/baking/open_close.mp3');
         this.load.audio('bg', 'assets/baking/bg-happy.mp3');
 
+        this.load.audio('overcooked_bake', 'assets/sounds/music/overcooked_bake.mp3');
 
         this.load.image('background', "assets/baking/bg-baking.png");
         this.load.image('oven-close', "assets/baking/oven-close.png");
@@ -163,6 +164,9 @@
 
                 
             });
+
+        var backgroundMusic = this.sound.add('overcooked_bake', { volume: 0.4 });
+        backgroundMusic.play();
 
     }
 

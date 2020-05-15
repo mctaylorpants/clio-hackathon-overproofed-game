@@ -153,7 +153,7 @@
 
     function preload() {
       this.load.audio('bubbling', 'assets/starter-bubbling.mp3');
-      this.load.audio('overcooked_intro', 'assets/overcooked_intro.mp3');
+      this.load.audio('overcooked_starter', 'assets/sounds/music/overcooked_starter.mp3');
       this.load.audio('pour_flour', 'assets/pour_flour.mp3');
       this.load.audio('pour_water', 'assets/pour_water.mp3');
 
@@ -202,7 +202,7 @@
 
       // audio sounds
       bubblingSound = this.sound.add('bubbling', { loop: true });
-      var backgroundMusic = this.sound.add('overcooked_intro', { volume: 0.4 });
+      var backgroundMusic = this.sound.add('overcooked_starter', { volume: 0.4 });
       var pourFlour = this.sound.add('pour_flour');
       var pourWater = this.sound.add('pour_water');
 
@@ -314,7 +314,7 @@
         </a>
       </div>
       <div>
-        <img src="assets/title/starter_title.png" width="700"/>
+        <img src="assets/title/starter_title.png" width="700" />
       </div>
     </div>
     <div id="game">

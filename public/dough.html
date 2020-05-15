@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser-arcade-physics.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser-arcade-physics.min.js"></script>
 </head>
+
 <body>
   <style>
     @font-face {
@@ -18,35 +20,35 @@
   <!-- HACK TO LOAD THE FONT -->
   <div style="font-family:'AmaticSC-Bold'; position:absolute; left:-1000px; visibility:hidden;">.</div>
 
-    <script>
+  <script>
     var config = {
-    type: Phaser.AUTO,
+      type: Phaser.AUTO,
 
-    parent: 'game',
-    width: 960,
-    height: 540,
+      parent: 'game',
+      width: 960,
+      height: 540,
 
-    physics: {
-      default: 'arcade',
-      arcade: {
-        gravity: { y: 150 },
-        debug: false,
-      }
-    },
-    scene: {
-      preload: preload,
-      create: create,
-      update: update,
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 150 },
+          debug: false,
         }
+      },
+      scene: {
+        preload: preload,
+        create: create,
+        update: update,
+      }
     };
 
     var game = new Phaser.Game(config);
 
-    function preload ()
-    {
+    function preload() {
       //add sounds
       this.load.audio('pour_flour', 'assets/pour_flour.mp3');
       this.load.audio('pour_water', 'assets/pour_water.mp3');
+      this.load.audio('overcooked_dough', 'assets/sounds/music/overcooked_dough.mp3');
 
       //add images
       this.load.image('background', 'assets/background.jpg');
@@ -92,8 +94,7 @@
     var timerStarted = false;
     var timerState = 1;
 
-    function create ()
-    {
+    function create() {
       WebFont.load({
         custom: {
           families: ['AmaticSC-Regular', 'AmaticSC-Bold']
@@ -101,10 +102,10 @@
       });
 
       this.anims.create({
-          key: 'tickingClocks',
-          frames: [{ key: 'clock0' }, { key: 'clock1' }, { key: 'clock2' }, { key: 'clock3' }, { key: 'clock4' }, { key: 'clock5' }, { key: 'clock6' }, { key: 'clock7' }, { key: 'clock0' }],
-          frameRate: 1,
-          repeat: 0,
+        key: 'tickingClocks',
+        frames: [{ key: 'clock0' }, { key: 'clock1' }, { key: 'clock2' }, { key: 'clock3' }, { key: 'clock4' }, { key: 'clock5' }, { key: 'clock6' }, { key: 'clock7' }, { key: 'clock0' }],
+        frameRate: 1,
+        repeat: 0,
       });
 
       platforms = this.physics.add.staticGroup();
@@ -123,16 +124,18 @@
       });
       buttonNext.visible = false;
 
+      var backgroundMusic = this.sound.add('overcooked_dough', { volume: 0.4 });
+      backgroundMusic.play();
     }
 
     function showNextButton(timeDelay) {
-      intervalButton = setInterval(function() {
+      intervalButton = setInterval(function () {
         buttonNext.visible = true;
       }, timeDelay);
     }
 
     function initializeTimer() {
-      startTimerText = game.scene.scenes[0].add.text(225, 470, "", { fontSize: '16px', fill: '#000'});
+      startTimerText = game.scene.scenes[0].add.text(225, 470, "", { fontSize: '16px', fill: '#000' });
 
       startTimerText.setInteractive();
       startTimerText.on('pointerdown', startTimer);
@@ -166,7 +169,7 @@
     }
 
     function playSound(itemToPlay, itemScore, threshold) {
-      (itemScore < threshold) ? itemToPlay.play(): null;
+      (itemScore < threshold) ? itemToPlay.play() : null;
     }
 
     function startTimer() {
@@ -175,7 +178,7 @@
       dough.setDisplaySize(1000, 1000)
 
       var timesDoughRisingRun = 0;
-      doughRisingInterval = setInterval(function() {
+      doughRisingInterval = setInterval(function () {
         timesDoughRisingRun++;
         timerState++;
 
@@ -188,14 +191,14 @@
 
     function onPointerDownWater() {
       playSound(game.sound.sounds[0], scoreWater, 1000);
-      interval = setInterval(function() {
+      interval = setInterval(function () {
         addWater();
       }, 5);
     }
 
     function onPointerDownFlour() {
       playSound(game.sound.sounds[1], scoreFlour, 1000);
-      interval = setInterval(function() {
+      interval = setInterval(function () {
         addFlour();
       }, 5);
     }
@@ -228,8 +231,7 @@
       scoreTextFlour.setText('Flour: ' + scoreFlour + 'g/1000g');
     }
 
-    function update ()
-    {
+    function update() {
       var combinedTotal = scoreFlour + scoreWater;
       if (combinedTotal > 300 && combinedTotal <= 600) {
         dough.setDisplaySize(500, 375);
@@ -256,20 +258,21 @@
         dough.setDisplaySize(dough.displayWidth + (timerState * 70), dough.displayHeight + (timerState * 70));
       }
     }
-    </script>
+  </script>
 
-    <div id="container" style="display: flex;flex-direction: column;align-items: center;margin-top: 20px">
-      <div id="ui" style="margin-bottom: 20px; width:960px; display: flex; justify-content: left">
-        <div>
-          <a href="index.html">
-            <img src="assets/back.png" width="60" />
-          </a>
-        </div>
-        <div>
-          <img src="assets/title/create_dough_title.png" width="590"/>
-        </div>
+  <div id="container" style="display: flex;flex-direction: column;align-items: center;margin-top: 20px">
+    <div id="ui" style="margin-bottom: 20px; width:960px; display: flex; justify-content: left">
+      <div>
+        <a href="index.html">
+          <img src="assets/back.png" width="60" />
+        </a>
       </div>
+      <div>
+        <img src="assets/title/create_dough_title.png" width="590" />
+      </div>
+    </div>
     <div id="game">
     </div>
-  </body>
+</body>
+
 </html>

@@ -6,7 +6,7 @@
 </head>
 
 <body>
-  
+
 
   <script>
     var config = {
@@ -40,10 +40,13 @@
         duration: 1000,
         yoyo: true,
         loop: -1
-      })      
+      })
     }
     function preload() {
       this.cameras.main.setBackgroundColor("#fff")
+
+      this.load.audio('overcooked_intro', 'assets/overcooked_intro.mp3');
+
       this.load.image('background', 'assets/starter-background.png');
       this.load.image('mascot1', 'assets/title/mascot1.png');
       this.load.image('mascot2', 'assets/title/mascot2.png');
@@ -62,8 +65,8 @@
     }
 
     function create() {
-      
-      
+
+
       bg = this.add.image(480, 270, 'background').setDisplaySize(960, 540);
       bg.setAlpha(0.09)
 
@@ -92,17 +95,17 @@
 
       this.anims.create({
         key: 'mascotAnim',
-        frames: [ { key: 'mascot1' }, { key: 'mascot2' }, { key: 'mascot3' }, { key: 'mascot4' }, { key: 'mascot5' }],
+        frames: [{ key: 'mascot1' }, { key: 'mascot2' }, { key: 'mascot3' }, { key: 'mascot4' }, { key: 'mascot5' }],
         frameRate: 2,
         repeat: -1
       })
       this.add.sprite(480, 270, 'mascot3').setScale(0.25).play('mascotAnim')
 
 
-      part1 = this.add.image(350,400, 'part1').setScale(0.5)
-      part2 = this.add.image(700,400, 'part2').setScale(0.5)
-      part3 = this.add.image(350,450, 'part3').setScale(0.5)
-      part4 = this.add.image(625,450, 'part4').setScale(0.5)
+      part1 = this.add.image(350, 400, 'part1').setScale(0.5)
+      part2 = this.add.image(700, 400, 'part2').setScale(0.5)
+      part3 = this.add.image(350, 450, 'part3').setScale(0.5)
+      part4 = this.add.image(625, 450, 'part4').setScale(0.5)
 
       this.add.text(350, 500, 'Made with 💧🌼❤️ by team overproofed', { fontSize: '12px', fill: '#666' });
 
@@ -112,9 +115,9 @@
         });
 
       part2.setInteractive()
-      .on('pointerup', function () {
-        window.location.href = '/dough.html';
-      });
+        .on('pointerup', function () {
+          window.location.href = '/dough.html';
+        });
 
       part3.setInteractive()
         .on('pointerup', function () {
@@ -122,17 +125,12 @@
         });
 
       part4.setInteractive()
-      .on('pointerup', function () {
-        window.location.href = '/baking.html';
-      });
+        .on('pointerup', function () {
+          window.location.href = '/baking.html';
+        });
 
-
-
-
-
-
-
-
+      var backgroundMusic = this.sound.add('overcooked_intro', { volume: 0.4 });
+      backgroundMusic.play();
     }
 
     function update() {
