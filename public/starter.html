@@ -92,17 +92,17 @@
       changeEmotion: function () {
         var combinedAmount = this.currentWaterAmount + this.currentFlourAmount;
         if (this.currentWaterAmount >= 110 || this.currentFlourAmount >= 110) {
-          jarFace.setText('😱')
+          jarFace.setTexture('starterScream');
           console.log("way too much!")
         }
         else if (combinedAmount > 180 && combinedAmount < 200) {
-          jarFace.setText('🙂')
+          jarFace.setTexture('starterExcited');
           console.log("getting close on ingredients...")
         } else if (combinedAmount >= 200 && combinedAmount < 202) {
+          jarFace.setTexture('starterPerfect');
           console.log("perfect!")
-          jarFace.setText('🤤');
         } else if (combinedAmount > 202 && combinedAmount < 220) {
-          jarFace.setText('😅');
+          jarFace.setTexture('starterSweat');
           console.log("a bit too much")
         }
 
@@ -136,6 +136,7 @@
           scene = game.scene.scenes[0]
           scene.add.text(270, 270, "Huzzah, your starter is feeding!", { fontSize: '25px', color: "green", backgroundColor: "#fff" })
 
+          jarFace.setTexture('starterBubbling');
           next.visible = true
         }
       }
@@ -155,13 +156,21 @@
       this.load.image('reset', 'assets/reset2.png');
       this.load.image('water', 'assets/water2.png');
 
+      this.load.image('starterSleep', 'assets/starter_sleep.png');
+      this.load.image('starterSleep2', 'assets/starter_sleep2.png');
+      this.load.image('starterExcited', 'assets/starter_excited.png');
+      this.load.image('starterPerfect', 'assets/starter_perfect.png');
+      this.load.image('starterSweat', 'assets/starter_sweat.png');
+      this.load.image('starterSweat2', 'assets/starter_sweat2.png');
+      this.load.image('starterScream', 'assets/starter_scream.png');
+      this.load.image('starterScream2', 'assets/starter_scream2.png');
+      this.load.image('starterBubbling', 'assets/starter_bubbling.png');
 
       this.load.image('measuringCup1', 'assets/measuringcup1.png');
       this.load.image('measuringCup2', 'assets/measuringcup2.png');
       this.load.image('measuringCup3', 'assets/measuringcup3.png');
       this.load.image('measuringCup4', 'assets/measuringcup4.png');
       this.load.image('measuringCup5', 'assets/measuringcup5.png');
-
     }
 
     function create() {
@@ -175,7 +184,7 @@
       // starter objects
       background = this.add.image(480, 270, 'background').setDisplaySize(960, 540);
       jar = this.physics.add.image(jarInitialPosition.x, jarInitialPosition.y, 'jar').setScale(0.25);
-      jarFace = this.add.text(430, jarInitialPosition.y, '😴', { fontSize: '100px' })
+      jarFace = this.add.image(jarInitialPosition.x + 10, jarInitialPosition.y + 30, 'starterSleep').setScale(0.25);
       flour = this.physics.add.image(flourInitialPosition.x, flourInitialPosition.y, 'flour');
       lid = this.physics.add.image(750, 350, 'lid').setScale(0.27);
       reset = this.physics.add.image(resetInitialPosition.x, resetInitialPosition.y, 'reset').setScale(0.07);
@@ -244,9 +253,11 @@
           starter.reset();
           water.setPosition(waterInitialPosition.x, waterInitialPosition.y);
           flour.setPosition(flourInitialPosition.x, flourInitialPosition.y);
+          lid.setPosition(750, 350)
+          lid.visible = false;
           setWaterScore(0)
           setFlourScore(0)
-          jarFace.setText('😴');
+          jarFace.setTexture('starterSleep');
         });
 
       // next object bahviours
@@ -257,10 +268,6 @@
         });
 
       // score objects
-
-
-
-
       waterScore = this.add.text(16, 16, '', { fontSize: '32px', fill: '#000' });
       waterScore.setBackgroundColor("#fff")
       flourScore = this.add.text(750, 16, '', { fontSize: '32px', fill: '#000', align: 'right' });
