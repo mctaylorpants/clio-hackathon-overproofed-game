@@ -38,6 +38,11 @@
 
     function preload ()
     {
+        this.load.audio('eating', 'assets/baking/eating.mp3');
+        this.load.audio('open-close', 'assets/baking/open_close.mp3');
+        this.load.audio('bg', 'assets/baking/bg-happy.mp3');
+
+
         this.load.image('background', "assets/baking/bg-baking.png");
         this.load.image('oven-close', "assets/baking/oven-close.png");
         this.load.image('oven-open', "assets/baking/oven-open.png");
@@ -69,6 +74,12 @@
     function create ()
     {
         this.add.image(480, 270, 'background').setDisplaySize(960, 540);
+
+        eating = this.sound.add('eating', {volume: 2.5});
+        open_close =  this.sound.add('open-close');
+        bg = this.sound.add('bg', {volume: 0.4});
+        bg.play();
+
 
         reset = this.physics.add.image(resetInitialPosition.x, resetInitialPosition.y, 'reset').setScale(0.07);
 
@@ -148,6 +159,8 @@
                 lever_point.visible = false;
                 lever_point.x = 152;
                 button_open.visible = false;
+                doughStatue = 0;
+
                 
             });
 
@@ -156,6 +169,7 @@
     function openOven() {
         oven_open.visible = true;
         oven_close.visible = false;
+        open_close.play();
         // button_close.visible = true;
         // button_open.visible = false;
 
@@ -171,6 +185,7 @@
     function closeOven() {
         oven_open.visible = false;
         oven_close.visible = true;
+        open_close.play();
         // button_close.visible = false;
         // button_open.visible = true;
 
@@ -294,8 +309,7 @@
         face.visible = false;
         openOven();
         button_open.visible = false;
-        if (doughStatue ==1 ){
-
+        if (doughStatue ===1 ){
             var num = 3;
 
             mouth.visible = true;
@@ -304,6 +318,7 @@
                 .on("pointerdown", function(){
                     if (num >=0) {
                         sourdough.setTexture(num.toString());
+                        eating.play();
                         num -= 1;
                     }
 
