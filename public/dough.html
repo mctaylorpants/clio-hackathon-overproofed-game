@@ -9,19 +9,19 @@
     <script>
     var config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: 960,
+    height: 540,
     physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 150 },
-            debug: false,
-        }
+      default: 'arcade',
+      arcade: {
+        gravity: { y: 150 },
+        debug: false,
+      }
     },
     scene: {
-        preload: preload,
-        create: create,
-        update: update,
+      preload: preload,
+      create: create,
+      update: update,
         }
     };
 
@@ -29,19 +29,25 @@
 
     function preload ()
     {
-        this.load.image('sky', 'assets/sky.png');
-        this.load.image('ground', 'assets/platform.png');
-        this.load.image('bird', 'assets/star.png');
-        this.load.image('bucket', 'assets/bucket.png');
-        // this.load.image('faucet', 'assets/faucet.png');
-        this.load.spritesheet('water',
-            'assets/dude.png',
-            { frameWidth: 100, frameHeight: 100 }
-        );
-        this.load.spritesheet('flour',
-            'assets/flour.png',
-            { frameWidth: 100, frameHeight: 100 }
-        );
+      //add sounds
+      this.load.audio('pour_flour', 'assets/pour_flour.mp3');
+      this.load.audio('pour_water', 'assets/pour_water.mp3');
+
+      //add images
+      this.load.image('background', 'assets/background.jpg');
+      this.load.image('ground', 'assets/platform.png');
+      this.load.image('dough-xs', 'assets/dough-xs.png');
+      this.load.image('water-button', 'assets/container_water.png');
+      this.load.image('flour-button', 'assets/flour.png');
+      this.load.image('next-button', 'assets/right_sourdough_arrow.png');
+      this.load.spritesheet('water',
+        'assets/water-small.png',
+        { frameWidth: 100, frameHeight: 100 }
+      );
+      this.load.spritesheet('flour',
+        'assets/flour-sprinkle.png',
+        { frameWidth: 200, frameHeight: 200 }
+      );
     }
 
     var platforms;
@@ -51,14 +57,22 @@
     var scoreTextWater;
     var scoreFlour = 0;
     var scoreTextFlour;
+    var dough;
+    var soundWater;
+    var soundFlour;
+    var buttonNext;
 
     function create ()
     {
-        this.add.image(400, 300, 'sky');
-        bucket = this.add.image(400, 420, 'bucket');
-        platforms = this.physics.add.staticGroup();
-        platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-        initializeDough();
+      platforms = this.physics.add.staticGroup();
+      platforms.create(420, 410, 'ground').setScale(2).refreshBody();
+      this.add.image(480, 270, 'background').setDisplaySize(960, 540);
+      buttonNext = this.add.image(910, 495, 'next-button').setScale(0.07);
+      buttonNext.setInteractive().on('pointerup', function () {
+        window.location.href = '/stage_three.html';
+      });
+      dough = this.add.image(500, 330, 'dough-xs').setDisplaySize(400, 300)
+      initializeDough();
     }
 
     function initializeDough() {
@@ -67,64 +81,99 @@
     }
 
     function initializeWater() {
-      scoreTextWater = game.scene.scenes[0].add.text(16, 16, 'Water Score: 0', { fontSize: '32px', fill: '#000' });
-      const waterButton = game.scene.scenes[0].add.text(100, 100, 'Add Water', { fill: '#0f0' });
+      this.soundWater = game.sound.add('pour_water');
+      scoreTextWater = game.scene.scenes[0].add.text(16, 150, 'Water: 0g/1000g', { fontSize: '32px', fill: '#000' });
+      const waterButton = game.scene.scenes[0].add.image(100, 400, 'water-button').setScale(2.0);
+
       waterButton.setInteractive();
       waterButton.on('pointerdown', onPointerDownWater);
-      waterButton.on('pointerup', onPointerUp); 
+      waterButton.on('pointerup', onPointerUp);
       waterButton.on('pointerout', onPointerOut);
     }
 
     function initializeFlour() {
-      scoreTextFlour = game.scene.scenes[0].add.text(450, 16, 'Flour Score: 0', { fontSize: '32px', fill: '#000' });
-      const flourButton = game.scene.scenes[0].add.text(200, 100, 'Add Flour', { fill: '#0f0' });
+      this.soundFlour = game.sound.add('pour_flour');
+      scoreTextFlour = game.scene.scenes[0].add.text(600, 150, 'Flour: 0g/1000g', { fontSize: '32px', fill: '#000' });
+      const flourButton = game.scene.scenes[0].add.image(900, 380, 'flour-button').setScale(1.50);
+
       flourButton.setInteractive();
       flourButton.on('pointerdown', onPointerDownFlour);
-      flourButton.on('pointerup', onPointerUp); 
+      flourButton.on('pointerup', onPointerUp);
       flourButton.on('pointerout', onPointerOut);
     }
 
+    function playSound(itemToPlay, itemScore, threshold) {
+      (itemScore < threshold) ? itemToPlay.play(): null;
+    }
+
     function onPointerDownWater() {
+      playSound(game.sound.sounds[0], scoreWater, 1000);
       interval = setInterval(function() {
         addWater();
-      }, 100);
+      }, 5);
     }
 
     function onPointerDownFlour() {
+      playSound(game.sound.sounds[1], scoreFlour, 1000);
       interval = setInterval(function() {
         addFlour();
-      }, 100);
+      }, 5);
     }
 
     function onPointerUp() {
       clearInterval(interval);
+      game.sound.sounds[0].stop();
+      game.sound.sounds[1].stop();
     }
 
     function onPointerOut() {
       clearInterval(interval);
+      game.sound.sounds[0].stop();
+      game.sound.sounds[1].stop();
     }
 
     function addWater() {
       console.log("Button clicked. scoreWater: " + scoreWater);
-
-      scoreWater += 1;
-      tester = game.scene.scenes[0].physics.add.sprite(400, 0, 'water');
-      game.scene.scenes[0].physics.add.collider(tester, platforms);
-      scoreTextWater.setText('Water Score: ' + scoreWater);
+      if (scoreWater < 1000) {
+        scoreWater += 1;
+        tester = game.scene.scenes[0].physics.add.sprite(500, 0, 'water');
+        game.scene.scenes[0].physics.add.collider(tester, platforms);
+        scoreTextWater.setText('Water: ' + scoreWater + 'g/1000g');
+      }
+      else {
+        this.onPointerOut();
+      }
     }
 
     function addFlour() {
       console.log("Button clicked. scoreFlour: " + scoreFlour);
-
-      scoreFlour += 1;
-      tester = game.scene.scenes[0].physics.add.sprite(400, 0, 'flour');
-      game.scene.scenes[0].physics.add.collider(tester, platforms);
-      scoreTextFlour.setText('Flour Score: ' + scoreFlour);
+      if (scoreFlour < 1000) {
+        scoreFlour += 1;
+        tester = game.scene.scenes[0].physics.add.sprite(500, 0, 'flour');
+        game.scene.scenes[0].physics.add.collider(tester, platforms);
+        scoreTextFlour.setText('Flour: ' + scoreFlour + 'g/1000g');
+      }
+      else {
+        this.onPointerOut();
+      }
     }
 
     function update ()
     {
-
+      var combinedTotal = scoreFlour + scoreWater;
+      if (combinedTotal > 300 && combinedTotal <= 600) {
+        dough.setDisplaySize(500, 375);
+      } else if (combinedTotal > 600 && combinedTotal <= 900) {
+        dough.setDisplaySize(600, 450);
+      } else if (combinedTotal > 900 && combinedTotal <= 1200) {
+        dough.setDisplaySize(700, 525);
+      } else if (combinedTotal > 1200 && combinedTotal <= 1500) {
+        dough.setDisplaySize(800, 600);
+      } else if (combinedTotal > 1500 && combinedTotal <= 1900) {
+        dough.setDisplaySize(900, 675);
+      } else if (combinedTotal > 1900 || scoreFlour > 1050 || scoreWater > 850) {
+        dough.setDisplaySize(600, 450);
+      }
     }
 
     </script>
