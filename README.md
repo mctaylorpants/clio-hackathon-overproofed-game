@@ -10,8 +10,8 @@
 
 
 ## Deploying
-1. Locally, run `./deploy.sh`. You must have valid sandbox AWS credentials for this to work.
-2. Check it out at https://z-hackathon-overproofed.s3.ca-central-1.amazonaws.com/index.html.
+1. It's as easy as `git push heroku master` (from @mctaylorpants' machine)
+2. Check it out at https://clio-hackathon-overproofed.herokuapp.com/
   * It might take a minute to refresh the cache; during this time you might see an Access Denied error, but it should resolve itself automatically.
 
 
