@@ -1,6 +1,6 @@
 # hackathon-overproofed-game
 
-🎮 Play the game at https://tinyurl.com/overproofed
+🎮 Play the game at https://clio-hackathon-overproofed.herokuapp.com/
 
 ## Dev setup
 1. Clone this repo: `git clone git@github.com:clio/hackathon-overproofed-game.git`
